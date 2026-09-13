@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  aegiscorp:
+    build: .
+    container_name: aegiscorp-os
+    ports:
+      - "8000:8000"
+    environment:
+      - AEGISCORP_ENV=production
+      - AEGISCORP_PORT=8000
+      - AEGISCORP_HOST=0.0.0.0
+      - AEGISCORP_DB_PATH=/app/data/aegiscorp_state.db
+    volumes:
+      - aegiscorp_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  aegiscorp_data:
