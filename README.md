@@ -181,6 +181,24 @@ pytest -v tests/
 
 ---
 
+## 🤖 Supported LLM Providers & Free Tier Ecosystem
+
+AegisCorp OS provides a provider-neutral adapter layer (`aegiscorp/agents/llm.py`). Out-of-the-box, it runs fully offline with a high-fidelity deterministic simulation engine requiring **zero API keys**.
+
+When you are ready to connect live frontier models, you can use any of the major free/open tier providers with zero credit card required:
+- **Groq**: Ultra-low latency Llama 3.3 and DeepSeek R1 (`GROQ_API_KEY`)
+- **OpenRouter**: Free community models (`OPENROUTER_API_KEY`)
+- **GitHub Models**: Free GPT-4o and Claude 3.5 Sonnet access (`GITHUB_TOKEN`)
+- **Cerebras**: High-speed Llama 3.1 70B (`CEREBRAS_API_KEY`)
+- **Google Gemini**: Free API tier via Google AI Studio (`GEMINI_API_KEY`)
+- **Ollama**: Local, private offline models (`llama3.2`, `qwen2.5`)
+
+For complete setup guides and curated directories of 480+ free LLM APIs, see [`docs/FREE_LLM_PROVIDERS.md`](docs/FREE_LLM_PROVIDERS.md).
+
+For runnable multi-agent patterns, MCP tooling, and RAG architectures, check out [Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps).
+
+---
+
 ## 📄 License
 
 Licensed under the [Apache License, Version 2.0](LICENSE).  
