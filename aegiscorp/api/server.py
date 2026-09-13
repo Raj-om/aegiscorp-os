@@ -22,6 +22,7 @@ from aegiscorp.execution.tools import ToolGateway
 from aegiscorp.finance.investment import InvestmentResearchEngine
 from aegiscorp.simulation.scenario_engine import ScenarioEngine, SimulationRequest
 from aegiscorp.agents.runtime import AgentRuntime, AgentTurnRequest
+from aegiscorp.training import TrainingTournamentEngine, get_curriculum, get_all_curricula
 from aegiscorp.ui import INDEX_HTML
 
 def create_app() -> FastAPI:
@@ -58,6 +59,7 @@ def create_app() -> FastAPI:
         risk_engine=risk_engine,
         approval_service=approval_service,
     )
+    training_engine = TrainingTournamentEngine(db=db)
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -102,6 +104,10 @@ def create_app() -> FastAPI:
         action: str = "BUY"
         amount_usd: float = 100_000.0
         price: float = 500.0
+
+    class TrainingRunPayload(BaseModel):
+        role_id: Optional[str] = None
+        enterprise_wide: bool = False
 
     # -------------------------------------------------------------
     # REST API ENDPOINTS
@@ -277,6 +283,57 @@ def create_app() -> FastAPI:
             current_price=payload.price,
         )
         return order.model_dump()
+
+    # -------------------------------------------------------------
+    # AGENT ACADEMY & TRAINING ENDPOINTS
+    # -------------------------------------------------------------
+
+    @app.post("/training/run")
+    def run_training_tournament(payload: TrainingRunPayload):
+        if payload.enterprise_wide or not payload.role_id:
+            results = training_engine.run_enterprise_tournament()
+            return {
+                "status": "ENTERPRISE_TOURNAMENT_COMPLETED",
+                "total_roles_evaluated": len(results),
+                "gold_medals": sum(1 for r in results.values() if r.scorecard.medal_tier == "GOLD"),
+                "silver_medals": sum(1 for r in results.values() if r.scorecard.medal_tier == "SILVER"),
+                "average_score": round(sum(r.scorecard.composite_score for r in results.values()) / len(results), 2),
+                "results": {k: v.model_dump() for k, v in results.items()},
+            }
+        else:
+            if payload.role_id not in ALL_ROLES:
+                raise HTTPException(status_code=404, detail=f"Role '{payload.role_id}' not found in organization hierarchy.")
+            res = training_engine.run_agent_tournament(payload.role_id)
+            return res.model_dump()
+
+    @app.get("/training/leaderboard")
+    def get_training_leaderboard():
+        return training_engine.get_enterprise_leaderboard()
+
+    @app.get("/training/curriculum/{role_id}")
+    def get_role_curriculum(role_id: str):
+        curr = get_curriculum(role_id)
+        if not curr:
+            raise HTTPException(status_code=404, detail=f"Curriculum for role '{role_id}' not found.")
+        return curr.model_dump()
+
+    @app.get("/training/curricula")
+    def list_all_curricula():
+        all_c = get_all_curricula()
+        return [
+            {
+                "role_id": c.role_id,
+                "role_title": c.role_title,
+                "department": c.department,
+                "level": c.level,
+                "theorems_count": len(c.theoretical_foundations),
+                "formulas_count": len(c.mathematical_formulations),
+                "papers_count": len(c.landmark_papers),
+                "standards_count": len(c.regulatory_and_industry_standards),
+                "scenarios_count": len(c.benchmark_scenarios),
+            }
+            for c in all_c.values()
+        ]
 
     return app
 

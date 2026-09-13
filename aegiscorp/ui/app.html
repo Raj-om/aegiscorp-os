@@ -66,8 +66,9 @@
   <!-- Navigation Bar -->
   <nav class="border-b border-slate-800 bg-slate-900/60 px-6 overflow-x-auto flex space-x-8 text-sm text-slate-400">
     <button onclick="switchTab('command-center')" id="tab-command-center" class="tab-btn active py-3.5 hover:text-slate-200 transition-colors">Command Center</button>
-    <button onclick="switchTab('org-chart')" id="tab-org-chart" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Org Hierarchy (39 Roles)</button>
+    <button onclick="switchTab('org-chart')" id="tab-org-chart" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Org Hierarchy (48 Roles)</button>
     <button onclick="switchTab('csuite-rooms')" id="tab-csuite-rooms" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">C-Suite Rooms</button>
+    <button onclick="switchTab('academy')" id="tab-academy" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Agent Academy & Training</button>
     <button onclick="switchTab('decisions-inbox')" id="tab-decisions-inbox" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Decision Inbox & Gates</button>
     <button onclick="switchTab('kpi-tower')" id="tab-kpi-tower" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">KPI Control Tower</button>
     <button onclick="switchTab('research-center')" id="tab-research-center" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Research & Discovery</button>
@@ -268,6 +269,98 @@
       </div>
     </div>
 
+    <!-- TAB 10: AGENT ACADEMY & TRAINING (SECTION 31.5) -->
+    <div id="view-academy" class="hidden space-y-6">
+      <!-- Academy Header & Directive -->
+      <div class="glass-card p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-800/40">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+              Agent Academy & PhD Intelligence Calibration
+              <span class="text-xs font-normal px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 font-mono">Section 31.5</span>
+            </h1>
+            <p class="text-sm text-slate-400 mt-1 max-w-3xl">
+              Equipping all 48 corporate roles with PhD-level theoretical foundations, formal mathematical proofs, landmark literature, and evaluating agent performance on the 9-vector scorecard.
+            </p>
+          </div>
+          <button onclick="runEnterpriseAcademyTournament()" id="btnRunTournament" class="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-cyan-600/20 transition-all flex items-center gap-2">
+            <span>⚔️</span> Run Enterprise Tournament (48 Roles)
+          </button>
+        </div>
+      </div>
+
+      <!-- Academy Metrics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="glass-card p-5 rounded-xl">
+          <div class="text-xs text-slate-400 font-mono">ENROLLED AGENTS</div>
+          <div class="text-2xl font-bold text-white mt-1" id="academyTotalRoles">48 Roles</div>
+          <div class="text-xs text-cyan-400 mt-2">● 100% PhD Curriculum Coverage</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="text-xs text-slate-400 font-mono">GOLD MEDALISTS (>= 90.0)</div>
+          <div class="text-2xl font-bold text-yellow-400 mt-1" id="academyGoldCount">--</div>
+          <div class="text-xs text-yellow-500/80 mt-2">Summa Cum Laude Honors</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="text-xs text-slate-400 font-mono">SILVER MEDALISTS (>= 80.0)</div>
+          <div class="text-2xl font-bold text-slate-200 mt-1" id="academySilverCount">--</div>
+          <div class="text-xs text-slate-400 mt-2">Magna Cum Laude Honors</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="text-xs text-slate-400 font-mono">ENTERPRISE AVERAGE SCORE</div>
+          <div class="text-2xl font-bold text-indigo-400 mt-1" id="academyAvgScore">-- / 100.0</div>
+          <div class="text-xs text-indigo-300 mt-2">9-Vector Weighted Index</div>
+        </div>
+      </div>
+
+      <!-- Two-Column Layout: Leaderboard & Syllabus Inspector -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Left: Leaderboard (7 cols) -->
+        <div class="lg:col-span-7 glass-card p-5 rounded-xl space-y-4">
+          <div class="flex justify-between items-center">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🏆</span> Agent Tournament Leaderboard
+            </h2>
+            <span class="text-xs font-mono text-slate-400" id="academyLastUpdated">Live Calibration</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="text-slate-400 border-b border-slate-800 font-mono">
+                <tr>
+                  <th class="pb-2">Rank</th>
+                  <th class="pb-2">Role</th>
+                  <th class="pb-2">Department</th>
+                  <th class="pb-2">Tier</th>
+                  <th class="pb-2 text-right">Score</th>
+                  <th class="pb-2 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="academyLeaderboardBody" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Role PhD Curriculum Explorer (5 cols) -->
+        <div class="lg:col-span-5 glass-card p-5 rounded-xl space-y-4 sticky top-20">
+          <div class="flex justify-between items-center">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🎓</span> PhD Curriculum Explorer
+            </h2>
+            <select id="curriculumRoleSelect" onchange="loadRoleCurriculumDetails(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-cyan-400 font-mono focus:outline-none focus:border-cyan-500">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+
+          <div id="curriculumDetailsCard" class="space-y-4 text-xs">
+            <div class="text-slate-500 animate-pulse">Select an agent role to inspect theoretical syllabus...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <footer class="border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
@@ -279,7 +372,7 @@
     const API_BASE = window.location.origin;
 
     function switchTab(tabId) {
-      const tabs = ['command-center', 'org-chart', 'csuite-rooms', 'decisions-inbox', 'kpi-tower', 'research-center', 'investments', 'simulation', 'audit-ledger'];
+      const tabs = ['command-center', 'org-chart', 'csuite-rooms', 'academy', 'decisions-inbox', 'kpi-tower', 'research-center', 'investments', 'simulation', 'audit-ledger'];
       tabs.forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         document.getElementById(`tab-${t}`).classList.remove('active');
@@ -289,6 +382,7 @@
 
       if (tabId === 'org-chart') loadOrgChart();
       if (tabId === 'csuite-rooms') loadCSuite();
+      if (tabId === 'academy') loadAcademy();
       if (tabId === 'decisions-inbox') loadDecisions();
       if (tabId === 'kpi-tower') loadKPIs();
       if (tabId === 'investments') loadInvestments();
@@ -576,6 +670,178 @@
         });
       } catch (e) {
         console.error(e);
+      }
+    async function loadAcademy() {
+      try {
+        const res = await fetch(`${API_BASE}/training/leaderboard`);
+        const leaderboard = await res.json();
+        
+        // Update stats
+        const goldCount = leaderboard.filter(r => r.medal_tier === 'GOLD').length;
+        const silverCount = leaderboard.filter(r => r.medal_tier === 'SILVER').length;
+        const avgScore = leaderboard.reduce((acc, r) => acc + r.composite_score, 0) / (leaderboard.length || 1);
+
+        document.getElementById('academyGoldCount').innerText = `${goldCount} Roles`;
+        document.getElementById('academySilverCount').innerText = `${silverCount} Roles`;
+        document.getElementById('academyAvgScore').innerText = `${avgScore.toFixed(1)} / 100.0`;
+        document.getElementById('academyLastUpdated').innerText = `Calibrated (${leaderboard.length} Roles)`;
+
+        // Render leaderboard table
+        const tbody = document.getElementById('academyLeaderboardBody');
+        tbody.innerHTML = '';
+        leaderboard.forEach((r, idx) => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-900/60 transition-colors';
+          const medalBadge = r.medal_tier === 'GOLD' 
+            ? '<span class="px-2 py-0.5 rounded bg-yellow-950/80 text-yellow-400 border border-yellow-700/50 font-bold">GOLD</span>'
+            : (r.medal_tier === 'SILVER' 
+              ? '<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-600 font-bold">SILVER</span>'
+              : '<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-500 border border-amber-800 font-bold">BRONZE</span>');
+
+          tr.innerHTML = `
+            <td class="py-2.5 text-slate-500 font-bold">#${idx + 1}</td>
+            <td class="py-2.5">
+              <div class="font-bold text-white">${r.role_title}</div>
+              <div class="text-[10px] text-slate-500">${r.role_id.toUpperCase()} • Level ${r.level}</div>
+            </td>
+            <td class="py-2.5 text-slate-400">${r.department}</td>
+            <td class="py-2.5">${medalBadge}</td>
+            <td class="py-2.5 text-right font-bold text-yellow-400">${r.composite_score.toFixed(1)}</td>
+            <td class="py-2.5 text-right">
+              <button onclick="inspectAndTrainRole('${r.role_id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-cyan-900 text-cyan-400 border border-slate-700 hover:border-cyan-600 transition-all text-[10px]">
+                Inspect & Train
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Populate role selector if not yet populated
+        const select = document.getElementById('curriculumRoleSelect');
+        if (select.children.length === 0) {
+          leaderboard.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.role_id;
+            opt.innerText = `${r.role_title} (${r.role_id.toUpperCase()})`;
+            select.appendChild(opt);
+          });
+          if (leaderboard.length > 0) {
+            loadRoleCurriculumDetails(leaderboard[0].role_id);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load academy", e);
+      }
+    }
+
+    async function inspectAndTrainRole(roleId) {
+      const select = document.getElementById('curriculumRoleSelect');
+      select.value = roleId;
+      await loadRoleCurriculumDetails(roleId);
+    }
+
+    async function loadRoleCurriculumDetails(roleId) {
+      const card = document.getElementById('curriculumDetailsCard');
+      card.innerHTML = '<div class="text-slate-400 animate-pulse">Loading curriculum...</div>';
+      try {
+        const res = await fetch(`${API_BASE}/training/curriculum/${roleId}`);
+        const c = await res.json();
+        
+        let html = `
+          <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white text-sm">${c.role_title}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded font-mono bg-cyan-950 text-cyan-400 border border-cyan-800">Tier ${c.level}</span>
+            </div>
+            <div class="text-[11px] text-slate-400"><strong>Department:</strong> ${c.department}</div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">Theoretical Foundations</div>
+            <ul class="space-y-1 text-slate-300 text-[11px]">
+              ${c.theoretical_foundations.map(t => `<li class="flex items-start gap-1.5"><span class="text-cyan-500">•</span> ${t}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="text-xs font-bold text-yellow-400 uppercase tracking-wider font-mono">Mathematical Formulations</div>
+            <div class="space-y-1.5">
+              ${c.mathematical_formulations.map(m => `
+                <div class="p-2 rounded bg-slate-950 border border-slate-800 font-mono text-[10px]">
+                  <div class="text-amber-300 font-bold">${m.name}</div>
+                  <div class="text-white bg-slate-900 p-1 rounded mt-1 overflow-x-auto">${m.formula}</div>
+                  <div class="text-slate-400 text-[10px] mt-1">${m.application}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider font-mono">Landmark Literature</div>
+            <div class="space-y-1.5">
+              ${c.landmark_papers.map(p => `
+                <div class="p-2 rounded bg-slate-950 border border-slate-800 text-[11px]">
+                  <div class="font-bold text-slate-200">"${p.title}"</div>
+                  <div class="text-[10px] text-slate-400">${p.authors} (${p.year}) • ${p.venue}</div>
+                  <div class="text-[10px] text-slate-500 mt-1 italic">${p.key_contribution}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono">Gold-Medalist Playbook</div>
+            <ul class="space-y-1 text-slate-300 text-[11px]">
+              ${c.gold_medalist_playbook.map(r => `<li class="flex items-start gap-1.5"><span class="text-emerald-400 font-bold">✓</span> ${r}</li>`).join('')}
+            </ul>
+          </div>
+
+          <div class="pt-2">
+            <button onclick="runSingleAgentTournament('${c.role_id}')" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
+              Evaluate & Calibrate ${c.role_id.toUpperCase()} Intelligence
+            </button>
+          </div>
+        `;
+        card.innerHTML = html;
+      } catch (e) {
+        card.innerHTML = `<div class="text-rose-400">Failed to load curriculum: ${e.message}</div>`;
+      }
+    }
+
+    async function runSingleAgentTournament(roleId) {
+      try {
+        const res = await fetch(`${API_BASE}/training/run`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({role_id: roleId})
+        });
+        const data = await res.json();
+        alert(`Tournament Complete for ${data.role_title}!\n\nComposite Score: ${data.scorecard.composite_score}/100\nMedal Tier: ${data.scorecard.medal_tier}\nScenario: ${data.scenario_title}`);
+        loadAcademy();
+      } catch (e) {
+        alert("Tournament evaluation error: " + e.message);
+      }
+    }
+
+    async function runEnterpriseAcademyTournament() {
+      const btn = document.getElementById('btnRunTournament');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> Running Tournament across 48 Roles...';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API_BASE}/training/run`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({enterprise_wide: true})
+        });
+        const data = await res.json();
+        alert(`Enterprise Tournament Completed!\n\nTotal Roles Evaluated: ${data.total_roles_evaluated}\nGold Medalists: ${data.gold_medals}\nSilver Medalists: ${data.silver_medals}\nAverage Composite Score: ${data.average_score}/100.0`);
+        await loadAcademy();
+      } catch (e) {
+        alert("Enterprise tournament error: " + e.message);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
       }
     }
 

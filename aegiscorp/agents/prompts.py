@@ -81,6 +81,35 @@ Be unusually interesting and intellectually alive. Ask the highest-value questio
         prompt += f"- Constraints: {'; '.join(role.constraints)}\n"
         prompt += f"- PhD-Level Domain Mastery: {'; '.join(role.elite_domain_mastery)}\n"
 
+        # Dynamically inject PhD Knowledge Base curriculum and Gold-Medalist Playbook
+        try:
+            from aegiscorp.training.knowledge_base import get_curriculum
+            curriculum = get_curriculum(role.role_id)
+            if curriculum:
+                prompt += "\nADVANCED PhD KNOWLEDGE FOUNDATIONS:\n"
+                for tf in curriculum.theoretical_foundations:
+                    prompt += f"• Theory: {tf}\n"
+                
+                if curriculum.mathematical_formulations:
+                    prompt += "\nMATHEMATICAL & QUANTITATIVE FORMULATIONS:\n"
+                    for mf in curriculum.mathematical_formulations:
+                        prompt += f"• [{mf.name}]: {mf.formula} (App: {mf.application})\n"
+                
+                if curriculum.landmark_papers:
+                    prompt += "\nLANDMARK CITATIONS & SCIENTIFIC LITERATURE:\n"
+                    for lp in curriculum.landmark_papers:
+                        prompt += f"• {lp.authors} ({lp.year}), \"{lp.title}\", {lp.venue}: {lp.key_contribution}\n"
+                
+                if curriculum.regulatory_and_industry_standards:
+                    prompt += f"\nREGULATORY & INDUSTRY STANDARDS: {'; '.join(curriculum.regulatory_and_industry_standards)}\n"
+                
+                if curriculum.gold_medalist_playbook:
+                    prompt += "\nGOLD-MEDALIST EXECUTION PLAYBOOK:\n"
+                    for rule in curriculum.gold_medalist_playbook:
+                        prompt += f"• {rule}\n"
+        except Exception:
+            pass
+
         return prompt
 
     @classmethod

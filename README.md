@@ -90,13 +90,26 @@ $$\text{Token} = \text{SHA256}(\text{ApproverRole} \parallel \text{DecisionID} \
 
 ---
 
-## 🔬 PhD-Level & Gold-Medalist Intelligence Framework
+## 🔬 PhD-Level & Gold-Medalist Intelligence Framework (Section 31)
 
-All agents operate under the mandatory Section 31 elite intelligence standard:
-- First-principles problem decomposition.
-- Evidence-backed models distinguishing facts, estimates, hypotheses, forecasts, and decisions.
-- Ten-point output format: Situation assessment, facts vs assumptions, options, recommendation, expected impact, risks & mitigations, dependencies, required approvals, next actions, escalation reasons.
-- Adversarial review, failure-mode stress testing, and continuous learning.
+All 48 corporate roles operate under an academically verified, domain-specialized PhD knowledge base and Gold-Medalist problem-solving standard:
+- **Foundational Theories**: Agency theory, CAPM, Modigliani-Miller, Black-Scholes-Merton, Nash equilibrium, Little's Law, Erlang-C, CAP/PACELC, Gunther's USL, Shannon entropy, Bass diffusion, Brogden-Cronbach-Gleser utility, Hackman-Oldham JCM.
+- **Landmark Literature**: Formal citations and insights from Nobel laureates and Turing Award winners (Jensen & Meckling, Markowitz, Myers & Majluf, Lamport, Ongaro & Ousterhout, Christensen, Porter, Sharp, Kahneman & Tversky, Schmidt & Hunter).
+- **Formal Mathematical Formulations**: Rigorous quantitative equations and proofs for capital budgeting, distributed consensus bounds, queue latency, and cohort retention.
+- **Regulatory & Legal Standards**: Delaware General Corporation Law (DGCL § 102/141), SOX 302/404, ASC 606, NIST SP 800-53/207, ISO 27001, ISO 9001/22301, GDPR, EEOC, and FCPA.
+- **Section 31.5 Nine-Vector Evaluation Scorecard**:
+  $$\text{Composite Score} = \sum_{i=1}^9 w_i \cdot S_i \in [0, 100]$$
+  1. **Domain Mastery** (20%)
+  2. **Reasoning Quality** (15%)
+  3. **Evidence Quality** (10%)
+  4. **Decision Accuracy** (15%)
+  5. **Execution Reliability** (15%)
+  6. **Risk Discipline** (10%)
+  7. **Collaboration** (5%)
+  8. **Innovation** (5%)
+  9. **Learning Velocity** (5%)
+
+Agents are awarded **Gold Medalist** ($\ge 90.0$), **Silver Medalist** ($\ge 80.0$), or **Bronze Medalist** ($\ge 70.0$) honors, and their dynamic `IntelligenceProfile` is calibrated and stored in SQLite.
 
 ---
 
@@ -126,8 +139,9 @@ aegiscorp serve --port 8000
 ```
 Open **http://127.0.0.1:8000** to interact with the real-time Enterprise Control Plane:
 - 🏢 **Executive Command Center**: Digital twin telemetry, ARR, runway, and strategic programs.
-- 🌳 **Live Org Hierarchy**: Visual tree and authority graph of all 39 roles.
+- 🌳 **Live Org Hierarchy**: Visual tree and authority graph of all 48 corporate roles.
 - 🏛️ **C-Suite Rooms**: Executive functional rooms (CTO, CFO, CPO, etc.).
+- 🎓 **Agent Academy & Training**: Live 48-role tournament leaderboard, 9-vector radar breakdowns, and PhD syllabus explorer.
 - 📥 **Decision Inbox**: Real-time governance approvals and cryptographic verification tokens.
 - 🗼 **KPI Control Tower**: Leading and lagging metrics across 8 functional domains.
 - 🔍 **Research & Discovery**: Multi-source web evaluation, candidate comparison, and license compliance.
@@ -143,8 +157,20 @@ Open **http://127.0.0.1:8000** to interact with the real-time Enterprise Control
 # View corporate digital twin vital signs
 aegiscorp status
 
-# Inspect full 39-role authority graph
+# Inspect full 48-role authority graph
 aegiscorp org
+
+# Train and evaluate an agent against its PhD benchmark (9-vector scorecard)
+aegiscorp train --role cto
+
+# Inspect the PhD-level curriculum, mathematical theorems, and landmark papers for any role
+aegiscorp train --curriculum cfo
+
+# View the enterprise academy leaderboard with medal rankings
+aegiscorp train --leaderboard
+
+# Run the full benchmark tournament across all 48 enterprise roles
+aegiscorp train --enterprise
 
 # Decompose a strategic objective into 7 departmental programs & run Monte Carlo
 aegiscorp run-scenario "Build a $1B cybersecurity company" --budget 30000000
