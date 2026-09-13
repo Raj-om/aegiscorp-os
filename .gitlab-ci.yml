@@ -1,0 +1,54 @@
+# AegisCorp OS — Enterprise GitLab CI/CD Pipeline
+# Governed Multi-Agent Corporate Digital Twin & Continuous Training Mesh
+
+image: python:3.11-slim
+
+stages:
+  - lint
+  - test
+  - train
+  - deploy
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  DEFAULT_LLM_PROVIDER: "deterministic"
+
+cache:
+  paths:
+    - .cache/pip
+
+before_script:
+  - python --version
+  - pip install --upgrade pip
+  - pip install -e ".[dev]"
+
+lint:
+  stage: lint
+  script:
+    - python -m compileall aegiscorp/ tests/
+    - echo "Python syntax and bytecode compilation verified successfully."
+
+test:
+  stage: test
+  script:
+    - python -m pytest tests/ -v
+
+multi-cloud-training:
+  stage: train
+  script:
+    - python -m aegiscorp.cli.main train --cloud --batch --provider mesh
+    - python -m aegiscorp.cli.main train --leaderboard
+    - echo "Multi-cloud agent mesh training executed successfully."
+
+docker-build:
+  stage: deploy
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - docker info
+  script:
+    - docker build -t aegiscorp-os:latest .
+    - echo "Production container image built successfully."
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
