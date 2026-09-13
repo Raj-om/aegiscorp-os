@@ -66,5 +66,45 @@ __all__ = [
     "CloudTrainingJobStatus",
     "PROVIDER_PROFILES",
     "WORKER_NODES",
+    # Version 2.0 Learning Map & Protocol Exports
+    "TrainingResource",
+    "BookReference",
+    "EvidenceMetadata",
+    "RoleLearningMap",
+    "MasterLearningTrack",
+    "ROLE_LEARNING_MAPS",
+    "MASTER_LEARNING_STACK",
+    "HIGH_VALUE_REFERENCE_LIBRARY",
+    "get_role_learning_map",
+    "list_role_learning_maps",
+    "get_master_learning_stack",
+    "get_high_value_reference_library",
+    "search_learning_resources",
+    "AdversarialTestVector",
+    "StageEvaluationResult",
+    "ProtocolRunSummary",
+    "EliteTrainingProtocolRunner",
 ]
+
+from aegiscorp.training.learning_map import (
+    TrainingResource,
+    BookReference,
+    EvidenceMetadata,
+    RoleLearningMap,
+    MasterLearningTrack,
+    ROLE_LEARNING_MAPS,
+    MASTER_LEARNING_STACK,
+    HIGH_VALUE_REFERENCE_LIBRARY,
+    get_role_learning_map,
+    list_role_learning_maps,
+    get_master_learning_stack,
+    get_high_value_reference_library,
+    search_learning_resources,
+)
+from aegiscorp.training.protocol import (
+    AdversarialTestVector,
+    StageEvaluationResult,
+    ProtocolRunSummary,
+    EliteTrainingProtocolRunner,
+)
 

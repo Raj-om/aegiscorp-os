@@ -31,6 +31,12 @@ from aegiscorp.training import (
     get_all_encyclopedias,
     search_encyclopedia,
     CloudTrainingOrchestrator,
+    get_master_learning_stack,
+    get_high_value_reference_library,
+    get_role_learning_map,
+    list_role_learning_maps,
+    search_learning_resources,
+    EliteTrainingProtocolRunner,
 )
 from aegiscorp.orchestration import (
     EnterpriseOrchestrator,
@@ -82,6 +88,7 @@ def create_app() -> FastAPI:
     dialectic_engine = DialecticDebateEngine()
     sop_pipeline = SOPPipeline()
     observability = AgentOpsObservability(db=db)
+    protocol_runner = EliteTrainingProtocolRunner(db=db)
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -478,6 +485,93 @@ def create_app() -> FastAPI:
                 }
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
+
+    # -------------------------------------------------------------
+    # ROLE TRAINING ENCYCLOPEDIA V2.0 & LEARNING MAP ENDPOINTS
+    # -------------------------------------------------------------
+
+    class ProtocolEvaluatePayload(BaseModel):
+        role_id: str
+        stage_number: Optional[int] = None
+
+    @app.get("/training/learning-map")
+    def get_learning_map_overview():
+        return {
+            "version": "2.0",
+            "snapshot_date": "2026-09-13",
+            "master_learning_stack": [t.model_dump() for t in get_master_learning_stack()],
+            "high_value_reference_library": get_high_value_reference_library(),
+            "roles_catalog": [
+                {
+                    "role_id": lm.role_id,
+                    "role_title": lm.role_title,
+                    "department": lm.department,
+                    "level": lm.level,
+                    "core_capability_profile": lm.core_capability_profile,
+                    "role_focus_summary": lm.role_focus_summary,
+                    "training_resources_count": len(lm.training_resources),
+                    "book_references_count": len(lm.book_references),
+                }
+                for lm in list_role_learning_maps()
+            ],
+        }
+
+    @app.get("/training/learning-map/search")
+    def search_learning_map_resources(q: str):
+        return search_learning_resources(query=q)
+
+    @app.get("/training/learning-map/{role_id}")
+    def get_single_role_learning_map(role_id: str):
+        lm = get_role_learning_map(role_id)
+        if not lm:
+            raise HTTPException(status_code=404, detail=f"Learning map for role '{role_id}' not found.")
+        return lm.model_dump()
+
+    @app.get("/training/protocol")
+    def get_training_protocol_spec():
+        dummy_role = ALL_ROLES["cto"]
+        vectors = protocol_runner.get_adversarial_vectors(dummy_role)
+        return {
+            "version": "2.0",
+            "stages": [
+                {"stage": 0, "name": "Stage 0 — Baseline", "focus": "Assess domain knowledge, quantitative reasoning, evidence quality, intelligence profile."},
+                {"stage": 1, "name": "Stage 1 — Foundations", "focus": "Mathematics/statistics, computing, economics, management, psychology."},
+                {"stage": 2, "name": "Stage 2 — Deep Specialization", "focus": "Advanced role-specific theory, system design, security, reliability."},
+                {"stage": 3, "name": "Stage 3 — Applied Labs", "focus": "Concrete projects, simulations, case studies, models, code experiments."},
+                {"stage": 4, "name": "Stage 4 — Adversarial Evaluation", "focus": "Red-team authority violations, hallucinated execution, stale knowledge, financial arithmetic, conflicting advice, prompt injection, policy drift."},
+                {"stage": 5, "name": "Stage 5 — Governance Qualification", "focus": "Least-privilege authority enforcement and bylaws compliance sign-off (Blueprint §§14-15)."},
+                {"stage": 6, "name": "Stage 6 — Continuous Learning", "focus": "Prediction vs actuals variance analysis, organizational memory update."},
+            ],
+            "adversarial_test_vectors": [v.model_dump() for v in vectors],
+        }
+
+    @app.post("/training/protocol/evaluate")
+    def evaluate_role_protocol(payload: ProtocolEvaluatePayload):
+        if payload.role_id not in ALL_ROLES:
+            raise HTTPException(status_code=404, detail=f"Role '{payload.role_id}' not found in organization hierarchy.")
+        
+        role = ALL_ROLES[payload.role_id]
+        if payload.stage_number is not None:
+            if payload.stage_number == 0:
+                stage_res = protocol_runner.evaluate_stage_0_baseline(role)
+            elif payload.stage_number == 1:
+                stage_res = protocol_runner.evaluate_stage_1_foundations(role)
+            elif payload.stage_number == 2:
+                stage_res = protocol_runner.evaluate_stage_2_specialization(role)
+            elif payload.stage_number == 3:
+                stage_res = protocol_runner.evaluate_stage_3_applied_labs(role)
+            elif payload.stage_number == 4:
+                stage_res = protocol_runner.evaluate_stage_4_adversarial(role)
+            elif payload.stage_number == 5:
+                stage_res = protocol_runner.evaluate_stage_5_governance(role)
+            elif payload.stage_number == 6:
+                stage_res = protocol_runner.evaluate_stage_6_continuous_learning(role)
+            else:
+                raise HTTPException(status_code=400, detail="Stage number must be between 0 and 6.")
+            return stage_res.model_dump()
+        else:
+            run_res = protocol_runner.run_full_protocol(payload.role_id)
+            return run_res.model_dump()
 
     # -------------------------------------------------------------
     # ENTERPRISE MULTI-AGENT ORCHESTRATION ENDPOINTS

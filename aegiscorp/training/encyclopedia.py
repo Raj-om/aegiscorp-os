@@ -12,6 +12,12 @@ the Board of Directors, Executive C-Suite, and all 7 departmental ladders:
 from typing import Dict, List, Optional, Any
 from pydantic import BaseModel, Field
 
+from aegiscorp.training.learning_map import (
+    TrainingResource,
+    BookReference,
+    get_role_learning_map,
+)
+
 
 class HistoricalCaseStudy(BaseModel):
     title: str
@@ -56,6 +62,10 @@ class EncyclopediaEntry(BaseModel):
     failure_modes: List[FailureMode]
     key_glossary: List[GlossaryTerm]
     decision_heuristics: List[DecisionHeuristic]
+    core_capability_profile: Optional[str] = None
+    role_focus_summary: Optional[str] = None
+    training_resources: List[TrainingResource] = Field(default_factory=list)
+    book_references: List[BookReference] = Field(default_factory=list)
 
 
 # -----------------------------------------------------------------------------
@@ -1389,6 +1399,18 @@ def search_encyclopedia(query: str, role_id: Optional[str] = None, limit: int = 
                 if hits > 0:
                     score += hits * 2.0
 
+        # 6. Match training resources and books (Version 2.0)
+        for res in entry.training_resources:
+            res_text = f"{res.title} {res.description} {res.track}".lower()
+            if q in res_text:
+                score += 15.0
+                matches.append(f"Training Resource: '{res.title}'")
+        for bk in entry.book_references:
+            bk_text = f"{bk.title} {bk.publisher} {bk.description}".lower()
+            if q in bk_text:
+                score += 15.0
+                matches.append(f"Reference Book: '{bk.title}'")
+
         if score > 0.0:
             results.append({
                 "role_id": entry.role_id,
@@ -1400,7 +1422,21 @@ def search_encyclopedia(query: str, role_id: Optional[str] = None, limit: int = 
                 "canonical_definition_snippet": entry.canonical_definition[:160] + "...",
                 "case_studies_count": len(entry.historical_case_studies),
                 "failure_modes_count": len(entry.failure_modes),
+                "training_resources_count": len(entry.training_resources),
+                "book_references_count": len(entry.book_references),
             })
 
     results.sort(key=lambda x: -x["score"])
     return results[:limit]
+
+
+# -----------------------------------------------------------------------------
+# Hydrate all 48 Encyclopedia Entries with Version 2.0 Learning Maps
+# -----------------------------------------------------------------------------
+for _role_id, _entry in ENCYCLOPEDIA.items():
+    _lm = get_role_learning_map(_role_id)
+    if _lm:
+        _entry.core_capability_profile = _lm.core_capability_profile
+        _entry.role_focus_summary = _lm.role_focus_summary
+        _entry.training_resources = _lm.training_resources
+        _entry.book_references = _lm.book_references

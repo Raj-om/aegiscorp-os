@@ -577,6 +577,208 @@ def telemetry(
         border_style="green",
     ))
 
+@app.command(name="learning-map")
+def learning_map(
+    role: Optional[str] = typer.Option(None, "--role", "-r", help="Role ID to inspect (e.g. cto, cfo, vp_eng)"),
+    tracks: bool = typer.Option(False, "--tracks", "-t", help="Display the 11 Master Learning Tracks"),
+    search: Optional[str] = typer.Option(None, "--search", "-s", help="Search learning resources and books"),
+):
+    """Inspect Version 2.0 Role Learning Maps, 11 Master Tracks, and Authoritative Books."""
+    from aegiscorp.training import (
+        get_role_learning_map,
+        list_role_learning_maps,
+        get_master_learning_stack,
+        search_learning_resources,
+    )
+
+    if tracks:
+        table = Table(title="AegisCorp OS — 11 Master Learning Tracks (Blueprint Section 2)")
+        table.add_column("Track", style="bold cyan")
+        table.add_column("Best Starting Resources", style="white")
+        table.add_column("Why It Matters", style="green")
+        table.add_column("Primary Link", style="yellow")
+
+        for tr in get_master_learning_stack():
+            table.add_row(tr.name, tr.starting_resources, tr.why_it_matters, tr.link)
+
+        console.print(table)
+        return
+
+    if search:
+        results = search_learning_resources(search)
+        if not results:
+            console.print(f"[yellow]No resources found matching '{search}'.[/yellow]")
+            return
+
+        table = Table(title=f"Learning Map Search Results for: '{search}'")
+        table.add_column("Role", style="cyan")
+        table.add_column("Type", style="magenta")
+        table.add_column("Title", style="bold white")
+        table.add_column("Provider / Publisher", style="green")
+        table.add_column("URL", style="yellow")
+
+        for res in results[:20]:
+            p = res.get("provider") or res.get("publisher") or "-"
+            table.add_row(res["role_title"], res["type"], res["title"], p, res["url"])
+
+        console.print(table)
+        return
+
+    if role:
+        lm = get_role_learning_map(role)
+        if not lm:
+            console.print(f"[red]Role '{role}' not found in Learning Maps catalog.[/red]")
+            return
+
+        console.print(Panel.fit(
+            f"[bold cyan]Role:[/bold cyan] {lm.role_title} ({lm.role_id}) | [bold green]Dept:[/bold green] {lm.department} | [bold yellow]Level:[/bold yellow] {lm.level}\n"
+            f"[bold white]Core Capability Profile:[/bold white]\n{lm.core_capability_profile}\n\n"
+            f"[bold magenta]Role Focus Summary:[/bold magenta] {lm.role_focus_summary}",
+            title="[Version 2.0 Role Learning Map]",
+            border_style="cyan",
+        ))
+
+        # Training Resources Table
+        rt = Table(title=f"Curated Training Resources ({len(lm.training_resources)})")
+        rt.add_column("Title", style="bold white")
+        rt.add_column("Track", style="cyan")
+        rt.add_column("Provider", style="green")
+        rt.add_column("Primary Link", style="yellow")
+        rt.add_column("Description", style="white")
+
+        for r in lm.training_resources:
+            rt.add_row(r.title, r.track, r.provider, r.url, r.description)
+
+        console.print(rt)
+
+        # Book References Table
+        bt = Table(title=f"Authoritative Reference Works & Encyclopedias ({len(lm.book_references)})")
+        bt.add_column("Title", style="bold white")
+        bt.add_column("Publisher", style="green")
+        bt.add_column("Role Focus", style="cyan")
+        bt.add_column("Link", style="yellow")
+        bt.add_column("Description", style="white")
+
+        for b in lm.book_references:
+            bt.add_row(b.title, b.publisher, b.role_focus, b.url, b.description)
+
+        console.print(bt)
+        return
+
+    # Overview table
+    all_maps = list_role_learning_maps()
+    table = Table(title=f"AegisCorp OS — Version 2.0 Role Learning Maps Catalog ({len(all_maps)} Roles)")
+    table.add_column("Role ID", style="cyan")
+    table.add_column("Role Title", style="bold white")
+    table.add_column("Department", style="green")
+    table.add_column("Level", style="magenta")
+    table.add_column("Resources", justify="right", style="yellow")
+    table.add_column("Books / References", justify="right", style="cyan")
+
+    for lm in sorted(all_maps, key=lambda x: (x.department, x.role_id)):
+        table.add_row(
+            lm.role_id,
+            lm.role_title,
+            lm.department,
+            lm.level,
+            str(len(lm.training_resources)),
+            str(len(lm.book_references)),
+        )
+
+    console.print(table)
+    console.print("[dim]Use --role <id> for role deep-dive, --tracks for 11 master tracks, or --search <query>.[/dim]")
+
+@app.command()
+def protocol(
+    role: str = typer.Option("cto", "--role", "-r", help="Role ID to evaluate (e.g. cto, cfo, ceo)"),
+    stage: Optional[int] = typer.Option(None, "--stage", "-s", help="Specific stage (0-6) to evaluate"),
+    red_team: bool = typer.Option(False, "--red-team", help="Inspect the 7 standard adversarial test vectors"),
+):
+    """Run the 7-Stage Elite-Agent Qualification Protocol with Adversarial Red-Teaming."""
+    from aegiscorp.training import EliteTrainingProtocolRunner
+
+    runner = EliteTrainingProtocolRunner()
+    role_obj = ALL_ROLES.get(role)
+    if not role_obj:
+        console.print(f"[red]Role '{role}' not found in ALL_ROLES.[/red]")
+        return
+
+    if red_team:
+        vectors = runner.get_adversarial_vectors(role_obj)
+        table = Table(title=f"Stage 4 Adversarial Red-Team Vectors for: {role_obj.title}")
+        table.add_column("Vector ID", style="cyan")
+        table.add_column("Challenge Name", style="bold red")
+        table.add_column("Category", style="magenta")
+        table.add_column("Scenario Prompt", style="white")
+        table.add_column("Expected Safe Behavior", style="green")
+
+        for v in vectors:
+            table.add_row(v.vector_id, v.vector_name, v.test_category, v.scenario_prompt, v.expected_safe_behavior)
+
+        console.print(table)
+        return
+
+    if stage is not None:
+        if stage == 0:
+            res = runner.evaluate_stage_0_baseline(role_obj)
+        elif stage == 1:
+            res = runner.evaluate_stage_1_foundations(role_obj)
+        elif stage == 2:
+            res = runner.evaluate_stage_2_specialization(role_obj)
+        elif stage == 3:
+            res = runner.evaluate_stage_3_applied_labs(role_obj)
+        elif stage == 4:
+            res = runner.evaluate_stage_4_adversarial(role_obj)
+        elif stage == 5:
+            res = runner.evaluate_stage_5_governance(role_obj)
+        elif stage == 6:
+            res = runner.evaluate_stage_6_continuous_learning(role_obj)
+        else:
+            console.print("[red]Stage must be between 0 and 6.[/red]")
+            return
+
+        status_color = "green" if res.status == "PASSED" else "yellow"
+        console.print(Panel.fit(
+            f"[bold cyan]Role:[/bold cyan] {role_obj.title} | [bold yellow]Stage:[/bold yellow] {res.stage_name}\n"
+            f"[bold white]Status:[/bold white] [{status_color}]{res.status}[/{status_color}] | [bold green]Score:[/bold green] {res.score:.1f}%\n"
+            f"[bold white]Checks:[/bold white] {res.checks_passed} / {res.checks_total} passed\n\n"
+            f"[bold white]Details:[/bold white]\n" + "\n".join(f"  * {d}" for d in res.details),
+            title="[Protocol Stage Evaluation]",
+            border_style=status_color,
+        ))
+        return
+
+    # Run full protocol
+    run_res = runner.run_full_protocol(role)
+    status_color = "green" if run_res.overall_qualification == "QUALIFIED" else "yellow"
+
+    table = Table(title=f"7-Stage Elite-Agent Protocol Evaluation: {run_res.role_title}")
+    table.add_column("Stage #", justify="center", style="cyan")
+    table.add_column("Stage Name", style="bold white")
+    table.add_column("Status", justify="center")
+    table.add_column("Score", justify="right")
+    table.add_column("Checks Passed", justify="center", style="green")
+
+    for st_num, st in sorted(run_res.stage_evaluations.items()):
+        sc_style = "green" if st.status == "PASSED" else "yellow"
+        table.add_row(
+            str(st_num),
+            st.stage_name,
+            f"[{sc_style}]{st.status}[/{sc_style}]",
+            f"{st.score:.1f}%",
+            f"{st.checks_passed} / {st.checks_total}",
+        )
+
+    console.print(table)
+    console.print(Panel.fit(
+        f"[bold white]Overall Qualification:[/bold white] [{status_color}]{run_res.overall_qualification}[/{status_color}]\n"
+        f"[bold white]Aggregate Score:[/bold white] [bold green]{run_res.overall_score}%[/bold green]\n"
+        f"[bold white]Governance Sign-Off:[/bold white] [bold cyan]{'APPROVED' if run_res.governance_signoff else 'PENDING'}[/bold cyan]\n"
+        f"[bold yellow]Recommendations:[/bold yellow]\n" + "\n".join(f"  * {r}" for r in run_res.recommended_actions),
+        title="[Elite-Agent Qualification Certificate]",
+        border_style=status_color,
+    ))
+
 if __name__ == "__main__":
     app()
 
