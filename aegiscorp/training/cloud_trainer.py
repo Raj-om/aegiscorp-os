@@ -41,6 +41,7 @@ class CloudProvider(str, Enum):
     GITHUB_MODELS = "github_models"
     OLLAMA = "ollama"
     CLOUD_CLUSTER = "cloud_cluster"
+    MESH = "mesh"
 
 
 class CloudTrainingJobStatus(str, Enum):
@@ -104,11 +105,11 @@ PROVIDER_PROFILES: Dict[str, Dict[str, Any]] = {
         "regions": ["eu-west-1", "us-east-2"],
     },
     "gemini": {
-        "name": "Google Gemini Pro Cloud",
-        "default_model": "gemini-1.5-pro",
-        "base_throughput": 340.0,
-        "base_latency_ms": 380.0,
-        "cost_per_1k_tokens": 0.00125,
+        "name": "Google Gemini Cloud",
+        "default_model": "gemini-3.6-flash",
+        "base_throughput": 420.0,
+        "base_latency_ms": 280.0,
+        "cost_per_1k_tokens": 0.00075,
         "regions": ["us-central1", "europe-west4"],
     },
     "cerebras": {
@@ -152,6 +153,25 @@ PROVIDER_PROFILES: Dict[str, Dict[str, Any]] = {
         "regions": ["us-east-1", "eu-west-1", "ap-northeast-1"],
     },
 }
+
+MESH_DEPARTMENT_ROUTING: Dict[str, str] = {
+    "Executive": "gemini",
+    "Board of Directors": "gemini",
+    "Engineering": "cerebras",
+    "Information Security": "cerebras",
+    "Finance": "mistral",
+    "Corporate Governance": "mistral",
+    "Legal": "mistral",
+    "Product": "github_models",
+    "Product Management": "github_models",
+    "Design": "github_models",
+    "Operations": "groq",
+    "Workforce": "groq",
+    "Sales": "openrouter",
+    "Marketing": "openrouter",
+    "People": "openrouter",
+}
+
 
 WORKER_NODES = [
     CloudWorkerNode(node_id="worker-use1-c7g-01", region="us-east-1", instance_type="c7g.16xlarge", provider="aws", status="HEALTHY", capacity_tps=550.0),
@@ -205,19 +225,28 @@ class CloudTrainingOrchestrator:
         if not role:
             raise ValueError(f"Role '{role_id}' not found in organizational hierarchy.")
 
-        p_key = provider.lower() if provider.lower() in PROVIDER_PROFILES else "cloud_cluster"
+        if provider.lower() in ("mesh", "multi_cloud", "auto"):
+            p_key = MESH_DEPARTMENT_ROUTING.get(role.department, "cloud_cluster")
+        else:
+            p_key = provider.lower() if provider.lower() in PROVIDER_PROFILES else "cloud_cluster"
         prof = PROVIDER_PROFILES[p_key]
         chosen_model = model or prof["default_model"]
 
         job_id = f"cjob_{uuid.uuid4().hex[:12]}"
         started_at = time.time()
         logs = []
-        logs.append(f"[{time.strftime('%H:%M:%S')}] Job {job_id} dispatched for role: {role.title} ({role.role_id.upper()}).")
+        logs.append(f"[{time.strftime('%H:%M:%S')}] Job {job_id} dispatched for role: {role.title} ({role.role_id.upper()}) via {prof['name']}.")
 
-        # 1. Select worker node & region
-        node = random.choice(WORKER_NODES)
+        # 1. Select worker node & region with provider affinity
+        matching_nodes = [w for w in WORKER_NODES if (
+            (p_key == "cerebras" and w.provider == "cerebras") or
+            (p_key == "gemini" and w.provider == "gcp") or
+            (p_key in ("mistral", "github_models") and w.provider == "azure") or
+            (p_key in ("groq", "openrouter") and w.provider == "aws")
+        )]
+        node = random.choice(matching_nodes) if matching_nodes else random.choice(WORKER_NODES)
         region = random.choice(prof["regions"])
-        logs.append(f"[{time.strftime('%H:%M:%S')}] Assigned worker {node.node_id} ({node.instance_type}) in region {region}.")
+        logs.append(f"[{time.strftime('%H:%M:%S')}] Assigned worker {node.node_id} ({node.instance_type}) in region {region} via {prof['name']}.")
 
         # 2. Retrieve PhD Curriculum & Role Encyclopedia Dossier
         curriculum = get_curriculum(role.role_id)

@@ -3,6 +3,27 @@ import json
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 
+
+def _load_dotenv_if_present():
+    """Load key-value pairs from .env into os.environ if present without third-party deps."""
+    env_path = os.path.join(os.getcwd(), ".env")
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+_load_dotenv_if_present()
+
+
 class LLMAdapter(ABC):
     """Abstract provider-neutral LLM adapter interface."""
     @abstractmethod
@@ -133,15 +154,15 @@ class MistralAdapter(OpenAICompatibleAdapter):
         )
 
 class GeminiAdapter(LLMAdapter):
-    def __init__(self, api_key: Optional[str] = None, model: str = "gemini-1.5-pro"):
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+    def __init__(self, api_key: Optional[str] = None, model: str = "gemini-3.6-flash"):
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         self.model = model
 
     def generate(self, system_prompt: str, prompt: str, temperature: float = 0.2) -> str:
         if not self.api_key:
             return DeterministicSimulationAdapter().generate(system_prompt, prompt)
         try:
-            import httpx
+            import urllib.request
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={self.api_key}"
             payload = {
                 "contents": [
@@ -149,16 +170,17 @@ class GeminiAdapter(LLMAdapter):
                 ],
                 "generationConfig": {"temperature": temperature}
             }
-            resp = httpx.post(url, json=payload, timeout=60.0)
-            if resp.status_code == 200:
-                data = resp.json()
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
                 return data["candidates"][0]["content"]["parts"][0]["text"]
-            return DeterministicSimulationAdapter().generate(system_prompt, prompt)
         except Exception:
             return DeterministicSimulationAdapter().generate(system_prompt, prompt)
 
 def get_llm_adapter(name: Optional[str] = None) -> LLMAdapter:
-    provider = (name or os.getenv("DEFAULT_LLM_PROVIDER", "deterministic")).lower()
+    default_p = "gemini" if (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")) else "deterministic"
+    provider = (name or os.getenv("DEFAULT_LLM_PROVIDER", default_p)).lower()
     if provider == "groq" and os.getenv("GROQ_API_KEY"):
         return GroqAdapter()
     if provider == "openrouter" and os.getenv("OPENROUTER_API_KEY"):
@@ -171,7 +193,7 @@ def get_llm_adapter(name: Optional[str] = None) -> LLMAdapter:
         return MistralAdapter()
     if provider == "openai" and os.getenv("OPENAI_API_KEY"):
         return OpenAIAdapter()
-    if provider == "gemini" and os.getenv("GEMINI_API_KEY"):
+    if provider == "gemini" and (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")):
         return GeminiAdapter()
     if provider == "ollama":
         base_url = f"{os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')}/v1"

@@ -169,6 +169,23 @@ def test_dispatch_batch_cloud_jobs(cloud_orchestrator):
     assert telem["total_jobs_completed"] == 3
 
 
+def test_dispatch_mesh_routing_cloud_jobs(cloud_orchestrator):
+    """Verify multi-cloud dynamic mesh routes roles to specialized cloud providers."""
+    roles = ["ceo", "cto", "cfo", "cpo", "coo", "cro"]
+    jobs = cloud_orchestrator.dispatch_batch_jobs(
+        provider="mesh",
+        role_ids=roles,
+    )
+    assert len(jobs) == 6
+    provider_map = {j.role_id: j.provider for j in jobs}
+    assert provider_map["ceo"] == "gemini"
+    assert provider_map["cto"] == "cerebras"
+    assert provider_map["cfo"] == "mistral"
+    assert provider_map["cpo"] == "github_models"
+    assert provider_map["coo"] == "groq"
+    assert provider_map["cro"] == "openrouter"
+
+
 def test_invalid_role_cloud_dispatch(cloud_orchestrator):
     """Verify error on invalid role dispatch."""
     with pytest.raises(ValueError):

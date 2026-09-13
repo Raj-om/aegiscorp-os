@@ -122,7 +122,7 @@ def train(
     leaderboard: bool = typer.Option(False, "--leaderboard", "-l", help="Display the enterprise academy leaderboard"),
     curriculum: Optional[str] = typer.Option(None, "--curriculum", "-c", help="View PhD-level curriculum for a role"),
     cloud: bool = typer.Option(False, "--cloud", help="Train agents in distributed cloud cluster"),
-    provider: str = typer.Option("cloud_cluster", "--provider", "-p", help="Cloud provider: groq, openrouter, gemini, cerebras, mistral, github_models, ollama, cloud_cluster"),
+    provider: str = typer.Option("mesh", "--provider", "-p", help="Cloud provider: mesh (auto-route), groq, openrouter, gemini, cerebras, mistral, github_models, ollama, cloud_cluster"),
     batch: bool = typer.Option(False, "--batch", "-b", help="Batch train all 48 roles in the cloud"),
 ):
     """Train agents on PhD benchmarks, evaluate against 9-vector scorecard, or dispatch to cloud."""
@@ -135,12 +135,13 @@ def train(
     if cloud:
         orch = CloudTrainingOrchestrator()
         if batch or enterprise:
-            console.print(f"[bold cyan]Dispatching batch cloud training across all 48 roles on provider:[/bold cyan] [bold yellow]{provider}[/bold yellow]...")
+            console.print(f"[bold cyan]Dispatching batch cloud training across all 48 roles on multi-cloud mesh:[/bold cyan] [bold yellow]{provider.upper()}[/bold yellow]...")
             jobs = orch.dispatch_batch_jobs(provider=provider)
-            table = Table(title=f"Cloud Training Cluster: Batch Results ({len(jobs)} Roles)")
+            table = Table(title=f"AegisCorp Multi-Cloud Mesh: Training Results ({len(jobs)} Roles)")
             table.add_column("Job ID", style="cyan")
             table.add_column("Role", style="white")
-            table.add_column("Node / Region", style="dim")
+            table.add_column("Provider", style="magenta")
+            table.add_column("Worker Node / Region", style="dim")
             table.add_column("Status", style="green")
             table.add_column("Throughput", justify="right", style="cyan")
             table.add_column("Score Delta", justify="right", style="bold yellow")
@@ -152,6 +153,7 @@ def train(
                 table.add_row(
                     j.id,
                     j.role_title,
+                    j.provider.upper(),
                     f"{j.worker_node} ({j.region})",
                     j.status,
                     f"{j.throughput_tok_sec} t/s",
