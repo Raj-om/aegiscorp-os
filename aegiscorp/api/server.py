@@ -20,6 +20,7 @@ from aegiscorp.execution.loop import ResearchExecutionLoop
 from aegiscorp.execution.task_graph import ExecutionTaskGraph, ExecutionTask, TaskStatus
 from aegiscorp.execution.tools import ToolGateway
 from aegiscorp.execution.awesome_apps_connector import AwesomeLLMAppsConnector
+from aegiscorp.execution.gitlab_connector import GitLabConnector
 from aegiscorp.finance.investment import InvestmentResearchEngine
 from aegiscorp.simulation.scenario_engine import ScenarioEngine, SimulationRequest
 from aegiscorp.agents.runtime import AgentRuntime, AgentTurnRequest
@@ -89,6 +90,7 @@ def create_app() -> FastAPI:
     sop_pipeline = SOPPipeline()
     observability = AgentOpsObservability(db=db)
     protocol_runner = EliteTrainingProtocolRunner(db=db)
+    gitlab_connector = GitLabConnector()
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -699,6 +701,48 @@ def create_app() -> FastAPI:
             message_topic=topic,
         )
         return res.model_dump()
+
+    # -------------------------------------------------------------
+    # GITLAB ENTERPRISE INTEGRATION ENDPOINTS
+    # -------------------------------------------------------------
+
+    class GitLabIssuePayload(BaseModel):
+        title: str
+        description: str
+        labels: Optional[List[str]] = None
+
+    @app.get("/gitlab/status")
+    def get_gitlab_status():
+        if not gitlab_connector.is_configured:
+            return {"status": "UNCONFIGURED", "message": "GITLAB_TOKEN not set."}
+        user = gitlab_connector.get_current_user()
+        proj = gitlab_connector.get_project_metadata()
+        return {
+            "status": "AUTHENTICATED" if user else "ERROR",
+            "user": user,
+            "project": proj,
+        }
+
+    @app.get("/gitlab/issues")
+    def list_gitlab_issues(state: str = "opened"):
+        issues = gitlab_connector.list_issues(state=state)
+        return [i.model_dump() for i in issues]
+
+    @app.post("/gitlab/issues")
+    def create_gitlab_issue(payload: GitLabIssuePayload):
+        issue = gitlab_connector.create_issue(
+            title=payload.title,
+            description=payload.description,
+            labels=payload.labels,
+        )
+        if not issue:
+            raise HTTPException(status_code=500, detail="Failed to create issue on GitLab.")
+        return issue.model_dump()
+
+    @app.get("/gitlab/pipelines")
+    def list_gitlab_pipelines(limit: int = 10):
+        pipelines = gitlab_connector.list_pipelines(limit=limit)
+        return [p.model_dump() for p in pipelines]
 
     return app
 

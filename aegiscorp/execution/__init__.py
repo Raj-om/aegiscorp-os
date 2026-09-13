@@ -6,6 +6,11 @@ from aegiscorp.execution.awesome_apps_connector import (
     AwesomeAppSpec,
     AWESOME_APP_CATALOG,
 )
+from aegiscorp.execution.gitlab_connector import (
+    GitLabConnector,
+    GitLabIssue,
+    GitLabPipelineSummary,
+)
 
 __all__ = [
     "ExecutionTaskGraph",
@@ -19,4 +24,7 @@ __all__ = [
     "AwesomeLLMAppsConnector",
     "AwesomeAppSpec",
     "AWESOME_APP_CATALOG",
+    "GitLabConnector",
+    "GitLabIssue",
+    "GitLabPipelineSummary",
 ]
