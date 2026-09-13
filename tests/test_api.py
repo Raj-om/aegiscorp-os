@@ -60,3 +60,36 @@ def test_submit_and_approve_decision_endpoint():
         assert app_res.status_code == 200
         app_data = app_res.json()
         assert "cfo" in app_data["approvals"]
+
+def test_awesome_apps_catalog_and_invocation():
+    # 1. Catalog retrieval
+    r_cat = client.get("/integrations/awesome-apps")
+    assert r_cat.status_code == 200
+    apps = r_cat.json()
+    assert len(apps) >= 10
+    app_ids = [a["app_id"] for a in apps]
+    assert "ai_system_architect_r1" in app_ids
+    assert "ai_vc_due_diligence_agent_team" in app_ids
+
+    # 2. Authorized invocation
+    r_auth = client.post("/integrations/awesome-apps/invoke", json={
+        "app_id": "ai_system_architect_r1",
+        "role_id": "cto",
+        "inputs": {"architecture_spec": "Distributed consensus cluster", "sla_latency_p99_ms": 5.0}
+    })
+    assert r_auth.status_code == 200
+    data_auth = r_auth.json()
+    assert data_auth["status"] == "SUCCESS"
+    assert data_auth["governance_check_passed"] is True
+    assert data_auth["payload"]["review_score"] > 90.0
+
+    # 3. Unauthorized invocation policy check
+    r_unauth = client.post("/integrations/awesome-apps/invoke", json={
+        "app_id": "ai_vc_due_diligence_agent_team",
+        "role_id": "junior_eng",
+        "inputs": {"target_company": "BigStartup"}
+    })
+    assert r_unauth.status_code == 200
+    data_unauth = r_unauth.json()
+    assert data_unauth["status"] == "POLICY_BLOCKED"
+    assert data_unauth["governance_check_passed"] is False

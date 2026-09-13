@@ -19,6 +19,7 @@ from aegiscorp.strategy.engine import StrategyEngine
 from aegiscorp.execution.loop import ResearchExecutionLoop
 from aegiscorp.execution.task_graph import ExecutionTaskGraph, ExecutionTask, TaskStatus
 from aegiscorp.execution.tools import ToolGateway
+from aegiscorp.execution.awesome_apps_connector import AwesomeLLMAppsConnector
 from aegiscorp.finance.investment import InvestmentResearchEngine
 from aegiscorp.simulation.scenario_engine import ScenarioEngine, SimulationRequest
 from aegiscorp.agents.runtime import AgentRuntime, AgentTurnRequest
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
         approval_service=approval_service,
     )
     training_engine = TrainingTournamentEngine(db=db)
+    apps_connector = AwesomeLLMAppsConnector(policy_engine=policy_engine)
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -334,6 +336,38 @@ def create_app() -> FastAPI:
             }
             for c in all_c.values()
         ]
+
+    # -------------------------------------------------------------
+    # AWESOME-LLM-APPS INTEGRATION ENDPOINTS
+    # -------------------------------------------------------------
+
+    class AwesomeAppInvokePayload(BaseModel):
+        app_id: str
+        role_id: str
+        inputs: Dict[str, Any] = Field(default_factory=dict)
+
+    @app.get("/integrations/awesome-apps")
+    def list_awesome_apps():
+        return [app.model_dump() for app in apps_connector.get_catalog().values()]
+
+    @app.post("/integrations/awesome-apps/invoke")
+    def invoke_awesome_app(payload: AwesomeAppInvokePayload):
+        try:
+            res = apps_connector.invoke_app(
+                app_id=payload.app_id,
+                role_id=payload.role_id,
+                inputs=payload.inputs,
+            )
+            db.record_event(
+                event_id=f"evt_{uuid.uuid4().hex[:10]}",
+                event_type="awesome_app_invoked",
+                aggregate_id=payload.app_id,
+                actor=payload.role_id,
+                payload={"status": res.status, "duration_ms": res.execution_time_ms},
+            )
+            return res.model_dump()
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
 
     return app
 

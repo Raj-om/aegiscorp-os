@@ -1,6 +1,11 @@
 from aegiscorp.execution.task_graph import ExecutionTaskGraph, ExecutionTask, TaskStatus
 from aegiscorp.execution.tools import ToolGateway, ToolExecutionResult
 from aegiscorp.execution.loop import ResearchExecutionLoop, ResearchRecord, CandidateEvaluation
+from aegiscorp.execution.awesome_apps_connector import (
+    AwesomeLLMAppsConnector,
+    AwesomeAppSpec,
+    AWESOME_APP_CATALOG,
+)
 
 __all__ = [
     "ExecutionTaskGraph",
@@ -11,4 +16,7 @@ __all__ = [
     "ResearchExecutionLoop",
     "ResearchRecord",
     "CandidateEvaluation",
+    "AwesomeLLMAppsConnector",
+    "AwesomeAppSpec",
+    "AWESOME_APP_CATALOG",
 ]
