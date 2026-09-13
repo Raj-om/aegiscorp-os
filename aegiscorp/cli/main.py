@@ -121,9 +121,74 @@ def train(
     enterprise: bool = typer.Option(False, "--enterprise", "-e", help="Run tournament across all 48 enterprise roles"),
     leaderboard: bool = typer.Option(False, "--leaderboard", "-l", help="Display the enterprise academy leaderboard"),
     curriculum: Optional[str] = typer.Option(None, "--curriculum", "-c", help="View PhD-level curriculum for a role"),
+    cloud: bool = typer.Option(False, "--cloud", help="Train agents in distributed cloud cluster"),
+    provider: str = typer.Option("cloud_cluster", "--provider", "-p", help="Cloud provider: groq, openrouter, gemini, cerebras, mistral, github_models, ollama, cloud_cluster"),
+    batch: bool = typer.Option(False, "--batch", "-b", help="Batch train all 48 roles in the cloud"),
 ):
-    """Train agents on PhD-level benchmarks and evaluate against the 9-vector scorecard."""
-    from aegiscorp.training import TrainingTournamentEngine, get_curriculum
+    """Train agents on PhD benchmarks, evaluate against 9-vector scorecard, or dispatch to cloud."""
+    from aegiscorp.training import (
+        TrainingTournamentEngine,
+        get_curriculum,
+        CloudTrainingOrchestrator,
+    )
+
+    if cloud:
+        orch = CloudTrainingOrchestrator()
+        if batch or enterprise:
+            console.print(f"[bold cyan]Dispatching batch cloud training across all 48 roles on provider:[/bold cyan] [bold yellow]{provider}[/bold yellow]...")
+            jobs = orch.dispatch_batch_jobs(provider=provider)
+            table = Table(title=f"Cloud Training Cluster: Batch Results ({len(jobs)} Roles)")
+            table.add_column("Job ID", style="cyan")
+            table.add_column("Role", style="white")
+            table.add_column("Node / Region", style="dim")
+            table.add_column("Status", style="green")
+            table.add_column("Throughput", justify="right", style="cyan")
+            table.add_column("Score Delta", justify="right", style="bold yellow")
+            table.add_column("Medal", justify="center")
+            table.add_column("Cost USD", justify="right", style="yellow")
+
+            for j in jobs:
+                medal_col = "yellow" if j.medal_tier == "GOLD" else ("white" if j.medal_tier == "SILVER" else "cyan")
+                table.add_row(
+                    j.id,
+                    j.role_title,
+                    f"{j.worker_node} ({j.region})",
+                    j.status,
+                    f"{j.throughput_tok_sec} t/s",
+                    f"{j.initial_score:.1f} -> {j.final_score:.1f} (+{j.score_delta:.1f})",
+                    f"[{medal_col}]{j.medal_tier}[/{medal_col}]",
+                    f"${j.cost_usd:.5f}",
+                )
+            console.print(table)
+            telem = orch.get_cluster_telemetry()
+            console.print(Panel.fit(
+                f"[bold green]Cluster Batch Complete[/bold green]\n"
+                f"Total Tokens: [bold white]{telem['total_tokens_processed']:,}[/bold white]\n"
+                f"Avg Latency: [bold cyan]{telem['average_latency_ms']:.1f} ms[/bold cyan] (Throughput: {telem['average_throughput_tok_sec']} tok/s)\n"
+                f"Total Compute Cost: [bold yellow]${telem['total_cost_usd']:.5f} USD[/bold yellow]\n"
+                f"Gold Medalists: [bold yellow]{telem['gold_medalists']}[/bold yellow] | Silver Medalists: [bold white]{telem['silver_medalists']}[/bold white]",
+                title="[Cloud Telemetry] Swarm Performance",
+                border_style="green",
+            ))
+            return
+
+        target_role = role or "cto"
+        console.print(f"[bold cyan]Dispatching cloud training for role:[/bold cyan] [bold yellow]{target_role.upper()}[/bold yellow] via provider [bold magenta]{provider}[/bold magenta]...")
+        job = orch.dispatch_job(role_id=target_role, provider=provider)
+        console.print(Panel.fit(
+            f"[bold cyan]Job ID:[/bold cyan] {job.id}\n"
+            f"[bold white]Role:[/bold white] {job.role_title} ({job.role_id.upper()})\n"
+            f"[bold green]Provider / Model:[/bold green] {job.provider} ({job.model})\n"
+            f"[bold magenta]Assigned Worker:[/bold magenta] {job.worker_node} [{job.region}]\n"
+            f"[bold yellow]Calibration Score:[/bold yellow] {job.initial_score:.2f} -> [bold green]{job.final_score:.2f}[/bold green] (+{job.score_delta:.2f} pts)\n"
+            f"[bold white]Awarded Medal Tier:[/bold white] {job.medal_tier}\n"
+            f"[bold cyan]Throughput & Latency:[/bold cyan] {job.throughput_tok_sec:.1f} tok/s ({job.latency_ms:.1f} ms latency)\n"
+            f"[bold yellow]Tokens & Compute Cost:[/bold yellow] {job.tokens_processed:,} tokens (${job.cost_usd:.5f} USD)\n\n"
+            f"[dim]Recent Cluster Logs:[/dim]\n" + "\n".join(f"  [dim]- {log}[/dim]" for log in job.logs[-4:]),
+            title="[Cloud Training] Job Completed Successfully",
+            border_style="green",
+        ))
+        return
 
     engine = TrainingTournamentEngine()
 
@@ -217,5 +282,119 @@ def train(
         border_style="yellow",
     ))
 
+
+@app.command()
+def encyclopedia(
+    role: Optional[str] = typer.Option(None, "--role", "-r", help="Specific role ID to inspect encyclopedic dossier (e.g. board, cto, cfo)"),
+    query: Optional[str] = typer.Option(None, "--query", "-q", help="Search query across all 48 role encyclopedias"),
+):
+    """Search and inspect the authoritative Corporate Role Encyclopedia and Historical Precedents."""
+    from aegiscorp.training import (
+        get_role_encyclopedia,
+        get_all_encyclopedias,
+        search_encyclopedia,
+    )
+
+    if query:
+        results = search_encyclopedia(query, role_id=role, limit=10)
+        if not results:
+            console.print(f"[yellow]No encyclopedic matches found for query: '{query}'[/yellow]")
+            return
+
+        table = Table(title=f"Encyclopedia Search Results for: '{query}' ({len(results)} matches)")
+        table.add_column("Role ID", style="cyan")
+        table.add_column("Title", style="white")
+        table.add_column("Department", style="green")
+        table.add_column("Relevance Score", justify="right", style="bold yellow")
+        table.add_column("Matches & Rationale", style="magenta")
+
+        for r in results:
+            table.add_row(
+                r["role_id"],
+                r["role_title"],
+                r["department"],
+                str(r["score"]),
+                "; ".join(r["matches"][:2]),
+            )
+        console.print(table)
+
+        if len(results) == 1 and not role:
+            role = results[0]["role_id"]
+        else:
+            return
+
+    if role:
+        entry = get_role_encyclopedia(role)
+        if not entry:
+            console.print(f"[red]Error: Encyclopedic dossier for role '{role}' not found.[/red]")
+            return
+
+        console.print(Panel.fit(
+            f"[bold cyan]Role:[/bold cyan] {entry.role_title} ({entry.role_id.upper()})\n"
+            f"[bold magenta]Department:[/bold magenta] {entry.department} (Tier {entry.level})\n\n"
+            f"[bold white]Canonical Definition:[/bold white]\n  {entry.canonical_definition}\n\n"
+            f"[bold yellow]Core Mandate:[/bold yellow]\n  {entry.core_mandate}",
+            title=f"[Encyclopedia] {entry.role_title} Dossier",
+            border_style="cyan",
+        ))
+
+        # Case Studies Table
+        c_table = Table(title="Landmark Historical Case Studies & Institutional Breakdowns")
+        c_table.add_column("Case Title", style="cyan")
+        c_table.add_column("Organization", style="yellow")
+        c_table.add_column("Year", justify="center", style="white")
+        c_table.add_column("Root Cause", style="magenta")
+        c_table.add_column("Role Implication", style="green")
+
+        for c in entry.historical_case_studies:
+            c_table.add_row(c.title, c.organization, str(c.year), c.root_cause[:80] + "...", c.role_implication[:80] + "...")
+        console.print(c_table)
+
+        # Failure Modes Table
+        f_table = Table(title="Pathology Anti-Patterns & Catastrophic Failure Modes")
+        f_table.add_column("Failure Mode", style="red")
+        f_table.add_column("Symptoms", style="white")
+        f_table.add_column("Mitigation Protocol", style="green")
+
+        for fm in entry.failure_modes:
+            f_table.add_row(fm.name, "; ".join(fm.symptoms[:2]), fm.mitigation_protocol)
+        console.print(f_table)
+
+        # Glossary & Heuristics
+        g_terms = ", ".join(f"{g.term} ({g.domain})" for g in entry.key_glossary)
+        h_heur = ", ".join(f"{h.name}: {h.principle}" for h in entry.decision_heuristics)
+        console.print(Panel.fit(
+            f"[bold blue]Key Technical Glossary:[/bold blue]\n  {g_terms}\n\n"
+            f"[bold green]Decision Heuristics:[/bold green]\n  {h_heur}",
+            title="[Domain Lexicon & Mental Models]",
+            border_style="blue",
+        ))
+        return
+
+    # Summary table across all 48 roles
+    all_entries = get_all_encyclopedias()
+    table = Table(title=f"Corporate Role Encyclopedia -- All {len(all_entries)} Roles")
+    table.add_column("Role ID", style="cyan")
+    table.add_column("Role Title", style="white")
+    table.add_column("Department", style="green")
+    table.add_column("Tier", justify="center")
+    table.add_column("Cases", justify="center", style="yellow")
+    table.add_column("Failure Modes", justify="center", style="red")
+    table.add_column("Glossary", justify="center", style="blue")
+
+    for e in sorted(all_entries.values(), key=lambda x: (x.level, x.department)):
+        table.add_row(
+            e.role_id,
+            e.role_title,
+            e.department,
+            str(e.level),
+            str(len(e.historical_case_studies)),
+            str(len(e.failure_modes)),
+            str(len(e.key_glossary)),
+        )
+    console.print(table)
+
+
 if __name__ == "__main__":
     app()
+

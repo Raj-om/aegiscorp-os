@@ -21,6 +21,25 @@ from aegiscorp.training.engine import (
     TournamentResult,
     SCORECARD_WEIGHTS,
 )
+from aegiscorp.training.encyclopedia import (
+    ENCYCLOPEDIA,
+    EncyclopediaEntry,
+    HistoricalCaseStudy,
+    FailureMode,
+    GlossaryTerm,
+    DecisionHeuristic,
+    get_role_encyclopedia,
+    get_all_encyclopedias,
+    search_encyclopedia,
+)
+from aegiscorp.training.cloud_trainer import (
+    CloudTrainingOrchestrator,
+    CloudTrainingJob,
+    CloudProvider,
+    CloudTrainingJobStatus,
+    PROVIDER_PROFILES,
+    WORKER_NODES,
+)
 
 __all__ = [
     "CURRICULA",
@@ -32,4 +51,20 @@ __all__ = [
     "EvaluationScorecard",
     "TournamentResult",
     "SCORECARD_WEIGHTS",
+    "ENCYCLOPEDIA",
+    "EncyclopediaEntry",
+    "HistoricalCaseStudy",
+    "FailureMode",
+    "GlossaryTerm",
+    "DecisionHeuristic",
+    "get_role_encyclopedia",
+    "get_all_encyclopedias",
+    "search_encyclopedia",
+    "CloudTrainingOrchestrator",
+    "CloudTrainingJob",
+    "CloudProvider",
+    "CloudTrainingJobStatus",
+    "PROVIDER_PROFILES",
+    "WORKER_NODES",
 ]
+

@@ -189,6 +189,33 @@ class DatabaseManager:
             );
             """)
 
+            # 14. cloud_training_jobs
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS cloud_training_jobs (
+                id TEXT PRIMARY KEY,
+                role_id TEXT NOT NULL,
+                role_title TEXT NOT NULL,
+                department TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                model TEXT NOT NULL,
+                worker_node TEXT NOT NULL,
+                region TEXT NOT NULL,
+                status TEXT NOT NULL,
+                tokens_processed INTEGER NOT NULL,
+                throughput_tok_sec REAL NOT NULL,
+                latency_ms REAL NOT NULL,
+                cost_usd REAL NOT NULL,
+                initial_score REAL NOT NULL,
+                final_score REAL NOT NULL,
+                score_delta REAL NOT NULL,
+                medal_tier TEXT NOT NULL,
+                epochs INTEGER NOT NULL,
+                logs TEXT NOT NULL,
+                started_at REAL NOT NULL,
+                completed_at REAL
+            );
+            """)
+
             conn.commit()
 
     def record_event(self, event_id: str, event_type: str, aggregate_id: str, actor: str, payload: Dict[str, Any]):
@@ -275,3 +302,102 @@ class DatabaseManager:
                 }
                 for r in rows
             ]
+
+    def save_cloud_training_job(self, job_data: Dict[str, Any]):
+        with self.get_connection() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO cloud_training_jobs (
+                    id, role_id, role_title, department, provider, model,
+                    worker_node, region, status, tokens_processed, throughput_tok_sec,
+                    latency_ms, cost_usd, initial_score, final_score, score_delta,
+                    medal_tier, epochs, logs, started_at, completed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    job_data["id"],
+                    job_data["role_id"],
+                    job_data["role_title"],
+                    job_data["department"],
+                    job_data["provider"],
+                    job_data["model"],
+                    job_data["worker_node"],
+                    job_data["region"],
+                    job_data["status"],
+                    job_data["tokens_processed"],
+                    job_data["throughput_tok_sec"],
+                    job_data["latency_ms"],
+                    job_data["cost_usd"],
+                    job_data["initial_score"],
+                    job_data["final_score"],
+                    job_data["score_delta"],
+                    job_data["medal_tier"],
+                    job_data["epochs"],
+                    json.dumps(job_data.get("logs", [])),
+                    job_data["started_at"],
+                    job_data.get("completed_at"),
+                )
+            )
+            conn.commit()
+
+    def get_cloud_training_job(self, job_id: str) -> Optional[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM cloud_training_jobs WHERE id = ?", (job_id,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            return {
+                "id": r["id"],
+                "role_id": r["role_id"],
+                "role_title": r["role_title"],
+                "department": r["department"],
+                "provider": r["provider"],
+                "model": r["model"],
+                "worker_node": r["worker_node"],
+                "region": r["region"],
+                "status": r["status"],
+                "tokens_processed": r["tokens_processed"],
+                "throughput_tok_sec": r["throughput_tok_sec"],
+                "latency_ms": r["latency_ms"],
+                "cost_usd": r["cost_usd"],
+                "initial_score": r["initial_score"],
+                "final_score": r["final_score"],
+                "score_delta": r["score_delta"],
+                "medal_tier": r["medal_tier"],
+                "epochs": r["epochs"],
+                "logs": json.loads(r["logs"]) if r["logs"] else [],
+                "started_at": r["started_at"],
+                "completed_at": r["completed_at"],
+            }
+
+    def list_cloud_training_jobs(self, limit: int = 50) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM cloud_training_jobs ORDER BY started_at DESC LIMIT ?", (limit,))
+            rows = cursor.fetchall()
+            return [
+                {
+                    "id": r["id"],
+                    "role_id": r["role_id"],
+                    "role_title": r["role_title"],
+                    "department": r["department"],
+                    "provider": r["provider"],
+                    "model": r["model"],
+                    "worker_node": r["worker_node"],
+                    "region": r["region"],
+                    "status": r["status"],
+                    "tokens_processed": r["tokens_processed"],
+                    "throughput_tok_sec": r["throughput_tok_sec"],
+                    "latency_ms": r["latency_ms"],
+                    "cost_usd": r["cost_usd"],
+                    "initial_score": r["initial_score"],
+                    "final_score": r["final_score"],
+                    "score_delta": r["score_delta"],
+                    "medal_tier": r["medal_tier"],
+                    "epochs": r["epochs"],
+                    "logs": json.loads(r["logs"]) if r["logs"] else [],
+                    "started_at": r["started_at"],
+                    "completed_at": r["completed_at"],
+                }
+                for r in rows
+            ]
+

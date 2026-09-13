@@ -359,6 +359,151 @@
           </div>
         </div>
       </div>
+
+      <!-- SECTION: DISTRIBUTED CLOUD TRAINING CENTER (MULTI-PROVIDER) -->
+      <div class="glass-card p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-800/40 space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <span>☁️</span> Distributed Cloud Training Center & Worker Mesh
+              <span class="text-xs font-normal px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-800 font-mono">Multi-Cloud Mesh</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Dispatch autonomous fine-tuning, knowledge distillation, and Section 31.5 score calibration across Groq, OpenRouter, Gemini, Cerebras, Mistral, GitHub Models, Ollama, and Cloud Clusters.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <select id="cloudProviderSelect" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-cyan-400 font-mono focus:outline-none focus:border-cyan-500">
+              <option value="cloud_cluster">AegisCorp Cloud Cluster (Auto-Distribute)</option>
+              <option value="groq">Groq LPU Cloud (llama-3.3-70b-versatile)</option>
+              <option value="openrouter">OpenRouter Global Mesh (llama-3.3-70b-free)</option>
+              <option value="gemini">Google Gemini Pro Cloud (gemini-1.5-pro)</option>
+              <option value="cerebras">Cerebras Wafer-Scale (llama3.1-70b)</option>
+              <option value="mistral">Mistral Enterprise Cloud (mistral-small)</option>
+              <option value="github_models">GitHub Azure Models (gpt-4o)</option>
+              <option value="ollama">Ollama Private Edge Node (llama3.2)</option>
+            </select>
+            <button onclick="dispatchRoleCloudTraining()" id="btnDispatchRoleCloud" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5">
+              <span>☁️</span> Cloud Train Selected Role
+            </button>
+            <button onclick="dispatchBatchCloudTraining()" id="btnDispatchBatchCloud" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5">
+              <span>⚡</span> Batch Train All 48 Roles in Cloud
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Cloud Telemetry Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">ACTIVE WORKERS</div>
+            <div class="text-base font-bold text-white mt-0.5" id="telemActiveWorkers">5 Nodes</div>
+            <div class="text-[10px] text-emerald-400 mt-1">Multi-Region Mesh</div>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">TOTAL TOKENS</div>
+            <div class="text-base font-bold text-cyan-400 mt-0.5" id="telemTotalTokens">--</div>
+            <div class="text-[10px] text-slate-400 mt-1">Curriculum + Ingestion</div>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">AVG THROUGHPUT</div>
+            <div class="text-base font-bold text-indigo-400 mt-0.5" id="telemThroughput">-- tok/s</div>
+            <div class="text-[10px] text-indigo-300 mt-1">LPU / CS-3 Accelerators</div>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">AVG LATENCY</div>
+            <div class="text-base font-bold text-yellow-400 mt-0.5" id="telemLatency">-- ms</div>
+            <div class="text-[10px] text-yellow-500/80 mt-1">Network Roundtrip</div>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">COMPUTE COST</div>
+            <div class="text-base font-bold text-emerald-400 mt-0.5" id="telemCost">$0.0000</div>
+            <div class="text-[10px] text-emerald-300 mt-1">Spot Cluster Efficiency</div>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] text-slate-400 font-mono">AVG SCORE GAIN</div>
+            <div class="text-base font-bold text-purple-400 mt-0.5" id="telemScoreGain">+0.0 pts</div>
+            <div class="text-[10px] text-purple-300 mt-1">Calibrated Accuracy</div>
+          </div>
+        </div>
+
+        <!-- Recent Cloud Jobs Table -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <h3 class="font-bold text-slate-200 font-mono uppercase tracking-wider flex items-center gap-2">
+              <span>📡</span> Live Cloud Job Stream & Calibrations
+            </h3>
+            <button onclick="loadCloudJobs()" class="text-cyan-400 hover:text-cyan-300 font-mono text-[11px]">↻ Refresh Jobs</button>
+          </div>
+          <div class="overflow-x-auto max-h-60 overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="text-slate-400 border-b border-slate-800 font-mono sticky top-0 bg-slate-900">
+                <tr>
+                  <th class="pb-2">Job ID</th>
+                  <th class="pb-2">Role</th>
+                  <th class="pb-2">Provider</th>
+                  <th class="pb-2">Node / Region</th>
+                  <th class="pb-2">Tokens</th>
+                  <th class="pb-2">Throughput</th>
+                  <th class="pb-2">Score Delta</th>
+                  <th class="pb-2">Medal</th>
+                  <th class="pb-2 text-right">Cost USD</th>
+                </tr>
+              </thead>
+              <tbody id="cloudJobsTableBody" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: CORPORATE ROLE ENCYCLOPEDIA & HISTORICAL PRECEDENTS -->
+      <div class="glass-card p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-sky-950/30 to-slate-900 border border-sky-800/40 space-y-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+              <span>📚</span> Corporate Role Encyclopedia & Historical Precedents Explorer
+              <span class="text-xs font-normal px-2 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800 font-mono">48 Canonical Dossiers</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Ontological definitions, core mandates, landmark catastrophic case studies (Enron, Boeing 737 MAX, Knight Capital, Lehman, Wirecard), failure modes, and domain glossaries.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <input type="text" id="encyclopediaSearchInput" onkeyup="if(event.key==='Enter') searchEncyclopediaUI()" placeholder="Search (e.g. Enron, Boeing, Knight Capital, fiduciary, latency)..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 font-mono w-full md:w-80 focus:outline-none focus:border-sky-500">
+            <button onclick="searchEncyclopediaUI()" class="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-semibold">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <!-- Search Results Box (Hidden by default until search) -->
+        <div id="encyclopediaSearchResults" class="hidden p-4 rounded-xl bg-slate-950 border border-sky-900/60 space-y-3">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-sky-400 font-mono">SEARCH RESULTS</span>
+            <button onclick="document.getElementById('encyclopediaSearchResults').classList.add('hidden')" class="text-slate-400 hover:text-white text-xs">Close</button>
+          </div>
+          <div id="encyclopediaSearchResultsList" class="space-y-2">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Role Encyclopedia Detailed Dossier Viewer -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div class="lg:col-span-4 space-y-3">
+            <label class="text-xs font-mono text-slate-400">Select Role Dossier to View:</label>
+            <select id="encyclopediaRoleSelect" onchange="loadRoleEncyclopediaUI(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-sky-400 font-mono focus:outline-none focus:border-sky-500">
+              <!-- Populated via JS -->
+            </select>
+            <div id="encyclopediaRoleSummaryCard" class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-2 font-mono">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+          <div class="lg:col-span-8 p-5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-4" id="encyclopediaDetailsView">
+            <div class="text-slate-500 animate-pulse text-xs">Select a role to inspect encyclopedic dossier...</div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -716,7 +861,7 @@
           tbody.appendChild(tr);
         });
 
-        // Populate role selector if not yet populated
+        // Populate curriculum role selector
         const select = document.getElementById('curriculumRoleSelect');
         if (select.children.length === 0) {
           leaderboard.forEach(r => {
@@ -729,6 +874,24 @@
             loadRoleCurriculumDetails(leaderboard[0].role_id);
           }
         }
+
+        // Populate encyclopedia role selector
+        const encSelect = document.getElementById('encyclopediaRoleSelect');
+        if (encSelect && encSelect.children.length === 0) {
+          leaderboard.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.role_id;
+            opt.innerText = `${r.role_title} (${r.role_id.toUpperCase()}) — ${r.department}`;
+            encSelect.appendChild(opt);
+          });
+          if (leaderboard.length > 0) {
+            loadRoleEncyclopediaUI(leaderboard[0].role_id);
+          }
+        }
+
+        // Load Cloud Training Telemetry & Jobs
+        loadCloudTelemetry();
+        loadCloudJobs();
       } catch (e) {
         console.error("Failed to load academy", e);
       }
@@ -738,6 +901,11 @@
       const select = document.getElementById('curriculumRoleSelect');
       select.value = roleId;
       await loadRoleCurriculumDetails(roleId);
+      const encSelect = document.getElementById('encyclopediaRoleSelect');
+      if (encSelect) {
+        encSelect.value = roleId;
+        loadRoleEncyclopediaUI(roleId);
+      }
     }
 
     async function loadRoleCurriculumDetails(roleId) {
@@ -796,15 +964,277 @@
             </ul>
           </div>
 
-          <div class="pt-2">
-            <button onclick="runSingleAgentTournament('${c.role_id}')" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
-              Evaluate & Calibrate ${c.role_id.toUpperCase()} Intelligence
+          <div class="pt-2 flex gap-2">
+            <button onclick="runSingleAgentTournament('${c.role_id}')" class="flex-1 py-2 bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
+              Evaluate Locally
+            </button>
+            <button onclick="dispatchRoleCloudTraining('${c.role_id}')" class="flex-1 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
+              Train in Cloud ☁️
             </button>
           </div>
         `;
         card.innerHTML = html;
       } catch (e) {
         card.innerHTML = `<div class="text-rose-400">Failed to load curriculum: ${e.message}</div>`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CLOUD TRAINING JAVASCRIPT FUNCTIONS
+    // -------------------------------------------------------------
+    async function loadCloudTelemetry() {
+      try {
+        const res = await fetch(`${API_BASE}/training/cloud/telemetry`);
+        const data = await res.json();
+        document.getElementById('telemActiveWorkers').innerText = `${data.active_workers} Nodes`;
+        document.getElementById('telemTotalTokens').innerText = (data.total_tokens_processed || 0).toLocaleString();
+        document.getElementById('telemThroughput').innerText = `${data.average_throughput_tok_sec || 480.0} tok/s`;
+        document.getElementById('telemLatency').innerText = `${data.average_latency_ms || 220.0} ms`;
+        document.getElementById('telemCost').innerText = `$${(data.total_cost_usd || 0).toFixed(4)}`;
+        document.getElementById('telemScoreGain').innerText = `+${(data.average_score_improvement || 0).toFixed(1)} pts`;
+      } catch (e) {
+        console.error("Failed to load cloud telemetry", e);
+      }
+    }
+
+    async function loadCloudJobs() {
+      try {
+        const res = await fetch(`${API_BASE}/training/cloud/jobs?limit=25`);
+        const jobs = await res.json();
+        const tbody = document.getElementById('cloudJobsTableBody');
+        tbody.innerHTML = '';
+        if (jobs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-500">No cloud jobs dispatched yet. Click "Cloud Train" above.</td></tr>`;
+          return;
+        }
+        jobs.forEach(j => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-900/60 transition-colors';
+          const medalBadge = j.medal_tier === 'GOLD' 
+            ? '<span class="px-1.5 py-0.5 rounded bg-yellow-950 text-yellow-400 border border-yellow-700 font-bold text-[10px]">GOLD</span>'
+            : '<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-600 font-bold text-[10px]">SILVER</span>';
+
+          tr.innerHTML = `
+            <td class="py-2 text-cyan-400 font-mono text-[11px]">${j.id}</td>
+            <td class="py-2 font-bold text-white">${j.role_title}</td>
+            <td class="py-2 text-indigo-300">${j.provider}</td>
+            <td class="py-2 text-slate-400 text-[10px]">${j.worker_node} (${j.region})</td>
+            <td class="py-2 text-slate-300 font-mono">${(j.tokens_processed || 0).toLocaleString()}</td>
+            <td class="py-2 text-cyan-300 font-mono">${j.throughput_tok_sec} t/s</td>
+            <td class="py-2 font-bold text-yellow-400 font-mono">+${j.score_delta.toFixed(1)}</td>
+            <td class="py-2">${medalBadge}</td>
+            <td class="py-2 text-right font-mono text-emerald-400">$${j.cost_usd.toFixed(5)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error("Failed to load cloud jobs", e);
+      }
+    }
+
+    async function dispatchRoleCloudTraining(explicitRoleId) {
+      const roleId = explicitRoleId || document.getElementById('curriculumRoleSelect').value || 'cto';
+      const provider = document.getElementById('cloudProviderSelect').value;
+      const btn = document.getElementById('btnDispatchRoleCloud');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> Cloud Training in Progress...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/training/cloud/dispatch`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            role_id: roleId,
+            provider: provider,
+            epochs: 3
+          })
+        });
+        const job = await res.json();
+        alert(`☁️ Cloud Training Job Complete!\n\nRole: ${job.role_title} (${job.role_id.toUpperCase()})\nProvider: ${job.provider} (${job.model})\nAssigned Worker: ${job.worker_node} [${job.region}]\nScore Recalibration: ${job.initial_score.toFixed(1)} -> ${job.final_score.toFixed(1)} (+${job.score_delta.toFixed(1)} pts)\nMedal Tier: ${job.medal_tier}\nTokens Processed: ${job.tokens_processed.toLocaleString()}\nLatency: ${job.latency_ms} ms (${job.throughput_tok_sec} tok/s)\nCompute Cost: $${job.cost_usd.toFixed(5)} USD`);
+        
+        await loadAcademy();
+      } catch (e) {
+        alert("Cloud training dispatch error: " + e.message);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    async function dispatchBatchCloudTraining() {
+      const provider = document.getElementById('cloudProviderSelect').value;
+      const btn = document.getElementById('btnDispatchBatchCloud');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> Dispatching 48 Cloud Workers...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/training/cloud/dispatch`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            provider: provider,
+            epochs: 2
+          })
+        });
+        const data = await res.json();
+        alert(`⚡ Batch Cloud Training Completed across ${data.dispatched_count} Roles!\n\nProvider Mesh: ${provider}\nActive Cloud Workers: ${data.telemetry.active_workers} Nodes\nTotal Tokens Ingested: ${data.telemetry.total_tokens_processed.toLocaleString()}\nTotal Compute Cost: $${data.telemetry.total_cost_usd.toFixed(5)} USD\nGold Medalists: ${data.telemetry.gold_medalists} | Silver Medalists: ${data.telemetry.silver_medalists}\nAverage Score Improvement: +${data.telemetry.average_score_improvement.toFixed(1)} pts`);
+        
+        await loadAcademy();
+      } catch (e) {
+        alert("Batch cloud training error: " + e.message);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CORPORATE ENCYCLOPEDIA JAVASCRIPT FUNCTIONS
+    // -------------------------------------------------------------
+    async function loadRoleEncyclopediaUI(roleId) {
+      const summaryCard = document.getElementById('encyclopediaRoleSummaryCard');
+      const detailsView = document.getElementById('encyclopediaDetailsView');
+      summaryCard.innerHTML = '<div class="text-slate-500 animate-pulse">Loading role summary...</div>';
+      detailsView.innerHTML = '<div class="text-slate-500 animate-pulse">Retrieving encyclopedic dossier...</div>';
+
+      try {
+        const res = await fetch(`${API_BASE}/training/encyclopedia/${roleId}`);
+        const entry = await res.json();
+
+        // Left Summary Card
+        summaryCard.innerHTML = `
+          <div class="text-white font-bold text-sm">${entry.role_title}</div>
+          <div class="text-sky-400 font-mono text-xs">Role ID: ${entry.role_id.toUpperCase()}</div>
+          <div class="text-slate-400">Department: ${entry.department}</div>
+          <div class="text-slate-400">Hierarchy Tier: ${entry.level}</div>
+          <div class="pt-2 text-slate-300 text-[11px] leading-relaxed border-t border-slate-800">
+            ${entry.canonical_definition}
+          </div>
+          <div class="pt-2">
+            <button onclick="dispatchRoleCloudTraining('${entry.role_id}')" class="w-full py-1.5 rounded bg-indigo-900/60 hover:bg-indigo-800 text-indigo-300 text-[11px] border border-indigo-700 font-semibold transition-all">
+              Train with this Dossier in Cloud ☁️
+            </button>
+          </div>
+        `;
+
+        // Right Detailed View
+        let casesHtml = entry.historical_case_studies.map(cs => `
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 text-xs">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="font-bold text-white text-sm">${cs.title}</span>
+                <span class="text-sky-400 ml-2 font-mono">(${cs.organization}, ${cs.year})</span>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800 text-[10px] font-mono">Precedent</span>
+            </div>
+            <div class="text-slate-300 text-[11px]"><strong class="text-slate-400">Incident:</strong> ${cs.incident_summary}</div>
+            <div class="text-amber-300 text-[11px]"><strong class="text-amber-400">Root Cause:</strong> ${cs.root_cause}</div>
+            <div class="text-rose-300 text-[11px]"><strong class="text-rose-400">Catastrophic Impact:</strong> ${cs.catastrophic_impact}</div>
+            <div class="text-emerald-300 text-[11px] bg-slate-950 p-2 rounded border border-slate-800/80"><strong class="text-emerald-400">Role Lesson & Implication:</strong> ${cs.role_implication}</div>
+          </div>
+        `).join('');
+
+        let failureHtml = entry.failure_modes.map(fm => `
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-rose-950/60 space-y-1.5 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-rose-400 text-sm flex items-center gap-1.5">
+                <span>⚠️</span> ${fm.name}
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Pathology Anti-Pattern</span>
+            </div>
+            <div class="text-slate-300 text-[11px]"><strong class="text-slate-400">Symptoms:</strong> ${fm.symptoms.join('; ')}</div>
+            <div class="text-amber-300 text-[11px]"><strong class="text-amber-400">Root Cause:</strong> ${fm.root_cause}</div>
+            <div class="text-emerald-300 text-[11px] bg-slate-950 p-2 rounded border border-slate-800/80"><strong class="text-emerald-400">Mitigation Protocol:</strong> ${fm.mitigation_protocol}</div>
+          </div>
+        `).join('');
+
+        let glossaryHtml = entry.key_glossary.map(g => `
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+            <div class="font-bold text-cyan-300 flex justify-between">
+              <span>${g.term}</span>
+              <span class="text-[10px] text-slate-500 font-mono">${g.domain}</span>
+            </div>
+            <div class="text-slate-300 text-[11px] mt-1">${g.definition}</div>
+          </div>
+        `).join('');
+
+        let heuristicsHtml = entry.decision_heuristics.map(h => `
+          <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+            <div class="font-bold text-emerald-400">${h.name}</div>
+            <div class="text-slate-200 italic text-[11px] mt-0.5">"${h.principle}"</div>
+            <div class="text-slate-400 text-[10px] mt-1">${h.application}</div>
+          </div>
+        `).join('');
+
+        detailsView.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-sky-950/40 border border-sky-800/60 space-y-1">
+            <div class="text-xs font-bold text-sky-400 uppercase font-mono tracking-wider">Core Organizational Mandate</div>
+            <p class="text-white text-sm font-semibold">${entry.core_mandate}</p>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-200 font-mono uppercase tracking-wider flex items-center gap-2">
+              <span>🏛️</span> Landmark Case Studies & Institutional Breakdowns (${entry.historical_case_studies.length})
+            </h3>
+            <div class="space-y-3">${casesHtml}</div>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="text-xs font-bold text-slate-200 font-mono uppercase tracking-wider flex items-center gap-2">
+              <span>🛡️</span> Pathology Anti-Patterns & Catastrophic Failure Modes (${entry.failure_modes.length})
+            </h3>
+            <div class="space-y-3">${failureHtml}</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-cyan-400 font-mono uppercase">Key Technical Glossary</h4>
+              <div class="space-y-2">${glossaryHtml}</div>
+            </div>
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-emerald-400 font-mono uppercase">Decision Heuristics & Mental Models</h4>
+              <div class="space-y-2">${heuristicsHtml}</div>
+            </div>
+          </div>
+        `;
+      } catch (e) {
+        detailsView.innerHTML = `<div class="text-rose-400">Failed to load dossier: ${e.message}</div>`;
+      }
+    }
+
+    async function searchEncyclopediaUI() {
+      const q = document.getElementById('encyclopediaSearchInput').value.trim();
+      if (!q) return;
+      const box = document.getElementById('encyclopediaSearchResults');
+      const list = document.getElementById('encyclopediaSearchResultsList');
+      box.classList.remove('hidden');
+      list.innerHTML = '<div class="text-slate-400 text-xs animate-pulse font-mono">Searching encyclopedic dossiers...</div>';
+
+      try {
+        const res = await fetch(`${API_BASE}/training/encyclopedia/search?q=${encodeURIComponent(q)}`);
+        const results = await res.json();
+        if (results.length === 0) {
+          list.innerHTML = `<div class="text-yellow-400 text-xs font-mono">No matches found for "${q}". Try terms like "Enron", "Boeing", "Knight Capital", "fiduciary", "latency".</div>`;
+          return;
+        }
+
+        list.innerHTML = results.map(r => `
+          <div class="p-2.5 rounded-lg bg-slate-900 hover:bg-slate-800/80 border border-slate-800 transition-colors flex justify-between items-center cursor-pointer" onclick="document.getElementById('encyclopediaRoleSelect').value='${r.role_id}'; loadRoleEncyclopediaUI('${r.role_id}');">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-white text-xs">${r.role_title}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded bg-sky-950 text-sky-400 border border-sky-800 font-mono">${r.role_id.toUpperCase()}</span>
+                <span class="text-[10px] text-slate-400">${r.department}</span>
+              </div>
+              <div class="text-[10px] text-amber-300 font-mono mt-0.5">Matched: ${r.matches.join(' • ')}</div>
+            </div>
+            <span class="px-2 py-1 rounded bg-sky-900/60 text-sky-300 text-[10px] font-mono border border-sky-700">Inspect Dossier →</span>
+          </div>
+        `).join('');
+      } catch (e) {
+        list.innerHTML = `<div class="text-rose-400 text-xs">Search failed: ${e.message}</div>`;
       }
     }
 
@@ -847,6 +1277,7 @@
 
     // Initial load
     loadCompanyState();
+
   </script>
 </body>
 </html>

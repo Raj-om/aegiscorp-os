@@ -23,7 +23,15 @@ from aegiscorp.execution.awesome_apps_connector import AwesomeLLMAppsConnector
 from aegiscorp.finance.investment import InvestmentResearchEngine
 from aegiscorp.simulation.scenario_engine import ScenarioEngine, SimulationRequest
 from aegiscorp.agents.runtime import AgentRuntime, AgentTurnRequest
-from aegiscorp.training import TrainingTournamentEngine, get_curriculum, get_all_curricula
+from aegiscorp.training import (
+    TrainingTournamentEngine,
+    get_curriculum,
+    get_all_curricula,
+    get_role_encyclopedia,
+    get_all_encyclopedias,
+    search_encyclopedia,
+    CloudTrainingOrchestrator,
+)
 from aegiscorp.ui import INDEX_HTML
 
 def create_app() -> FastAPI:
@@ -62,6 +70,7 @@ def create_app() -> FastAPI:
     )
     training_engine = TrainingTournamentEngine(db=db)
     apps_connector = AwesomeLLMAppsConnector(policy_engine=policy_engine)
+    cloud_trainer = CloudTrainingOrchestrator(db=db, tournament_engine=training_engine)
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -366,6 +375,96 @@ def create_app() -> FastAPI:
                 payload={"status": res.status, "duration_ms": res.execution_time_ms},
             )
             return res.model_dump()
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
+
+    # -------------------------------------------------------------
+    # CORPORATE ENCYCLOPEDIA ENDPOINTS
+    # -------------------------------------------------------------
+
+    @app.get("/training/encyclopedia")
+    def list_all_encyclopedias():
+        all_e = get_all_encyclopedias()
+        return [
+            {
+                "role_id": e.role_id,
+                "role_title": e.role_title,
+                "department": e.department,
+                "level": e.level,
+                "core_mandate": e.core_mandate,
+                "case_studies_count": len(e.historical_case_studies),
+                "failure_modes_count": len(e.failure_modes),
+                "glossary_terms_count": len(e.key_glossary),
+                "heuristics_count": len(e.decision_heuristics),
+            }
+            for e in all_e.values()
+        ]
+
+    @app.get("/training/encyclopedia/search")
+    def search_encyclopedia_endpoint(q: str, role_id: Optional[str] = None, limit: int = 10):
+        return search_encyclopedia(query=q, role_id=role_id, limit=limit)
+
+    @app.get("/training/encyclopedia/{role_id}")
+    def get_single_role_encyclopedia(role_id: str):
+        entry = get_role_encyclopedia(role_id)
+        if not entry:
+            raise HTTPException(status_code=404, detail=f"Encyclopedic dossier for role '{role_id}' not found.")
+        return entry.model_dump()
+
+    # -------------------------------------------------------------
+    # CLOUD TRAINING & DISTRIBUTED CLUSTER ENDPOINTS
+    # -------------------------------------------------------------
+
+    class CloudTrainingDispatchPayload(BaseModel):
+        role_id: Optional[str] = None
+        provider: Optional[str] = "cloud_cluster"
+        model: Optional[str] = None
+        epochs: Optional[int] = 3
+
+    @app.get("/training/cloud/providers")
+    def get_cloud_providers():
+        return cloud_trainer.get_supported_providers()
+
+    @app.get("/training/cloud/workers")
+    def get_cloud_workers():
+        return cloud_trainer.get_worker_nodes()
+
+    @app.get("/training/cloud/telemetry")
+    def get_cloud_telemetry():
+        return cloud_trainer.get_cluster_telemetry()
+
+    @app.get("/training/cloud/jobs")
+    def list_cloud_jobs(limit: int = 50):
+        jobs = cloud_trainer.list_jobs(limit=limit)
+        return [j.model_dump() for j in jobs]
+
+    @app.get("/training/cloud/jobs/{job_id}")
+    def get_cloud_job(job_id: str):
+        job = cloud_trainer.get_job(job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Cloud training job '{job_id}' not found.")
+        return job.model_dump()
+
+    @app.post("/training/cloud/dispatch")
+    def dispatch_cloud_training(payload: CloudTrainingDispatchPayload):
+        try:
+            if payload.role_id:
+                job = cloud_trainer.dispatch_job(
+                    role_id=payload.role_id,
+                    provider=payload.provider or "cloud_cluster",
+                    model=payload.model,
+                    epochs=payload.epochs or 3,
+                )
+                return job.model_dump()
+            else:
+                jobs = cloud_trainer.dispatch_batch_jobs(
+                    provider=payload.provider or "cloud_cluster",
+                )
+                return {
+                    "dispatched_count": len(jobs),
+                    "jobs": [j.model_dump() for j in jobs],
+                    "telemetry": cloud_trainer.get_cluster_telemetry(),
+                }
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
 
