@@ -216,6 +216,51 @@ class DatabaseManager:
             );
             """)
 
+            # 15. orchestration_traces
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS orchestration_traces (
+                trace_id TEXT PRIMARY KEY,
+                initiative TEXT NOT NULL,
+                status TEXT NOT NULL,
+                total_cost_usd REAL NOT NULL,
+                total_tokens INTEGER NOT NULL,
+                duration_ms REAL NOT NULL,
+                spans_json TEXT NOT NULL,
+                created_at REAL NOT NULL
+            );
+            """)
+
+            # 16. orchestration_debates
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS orchestration_debates (
+                debate_id TEXT PRIMARY KEY,
+                topic TEXT NOT NULL,
+                role_a TEXT NOT NULL,
+                role_b TEXT NOT NULL,
+                consensus_score REAL NOT NULL,
+                is_approved INTEGER NOT NULL,
+                verdict_json TEXT NOT NULL,
+                rounds_json TEXT NOT NULL,
+                created_at REAL NOT NULL
+            );
+            """)
+
+            # 17. orchestration_artifacts
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS orchestration_artifacts (
+                bundle_id TEXT PRIMARY KEY,
+                initiative TEXT NOT NULL,
+                prd_json TEXT,
+                architecture_json TEXT,
+                financial_json TEXT,
+                gtm_json TEXT,
+                security_json TEXT,
+                runbook_json TEXT,
+                is_fully_signed_off INTEGER NOT NULL,
+                created_at REAL NOT NULL
+            );
+            """)
+
             conn.commit()
 
     def record_event(self, event_id: str, event_type: str, aggregate_id: str, actor: str, payload: Dict[str, Any]):
@@ -299,6 +344,52 @@ class DatabaseManager:
                     "amount": r["amount"],
                     "payload": json.loads(r["payload"]) if r["payload"] else {},
                     "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+    def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM agents WHERE id = ? OR role_id = ?", (agent_id, agent_id))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            return {
+                "id": r["id"],
+                "role_id": r["role_id"],
+                "name": r["name"],
+                "status": r["status"],
+                "model_profile": json.loads(r["model_profile"]) if r["model_profile"] else {},
+                "intelligence_profile": json.loads(r["intelligence_profile"]) if r["intelligence_profile"] else {},
+            }
+
+    def save_agent(self, agent_data: Dict[str, Any]):
+        with self.get_connection() as conn:
+            conn.execute("""
+            INSERT OR REPLACE INTO agents (id, role_id, name, status, model_profile, intelligence_profile)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (
+                agent_data["id"],
+                agent_data["role_id"],
+                agent_data.get("name", agent_data["role_id"].upper()),
+                agent_data.get("status", "ACTIVE"),
+                json.dumps(agent_data.get("model_profile", {})),
+                json.dumps(agent_data.get("intelligence_profile", {})),
+            ))
+            conn.commit()
+
+    def list_agents(self) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM agents")
+            rows = cursor.fetchall()
+            return [
+                {
+                    "id": r["id"],
+                    "role_id": r["role_id"],
+                    "name": r["name"],
+                    "status": r["status"],
+                    "model_profile": json.loads(r["model_profile"]) if r["model_profile"] else {},
+                    "intelligence_profile": json.loads(r["intelligence_profile"]) if r["intelligence_profile"] else {},
                 }
                 for r in rows
             ]
@@ -400,4 +491,155 @@ class DatabaseManager:
                 }
                 for r in rows
             ]
+
+    # --- Enterprise Orchestration Methods ---
+
+    def save_orchestration_trace(self, trace: Dict[str, Any]):
+        with self.get_connection() as conn:
+            conn.execute("""
+            INSERT OR REPLACE INTO orchestration_traces (
+                trace_id, initiative, status, total_cost_usd, total_tokens, duration_ms, spans_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                trace["trace_id"],
+                trace["initiative"],
+                trace["status"],
+                trace["total_cost_usd"],
+                trace["total_tokens"],
+                trace["duration_ms"],
+                json.dumps(trace.get("spans", [])),
+                trace.get("created_at", time.time()),
+            ))
+            conn.commit()
+
+    def get_orchestration_trace(self, trace_id: str) -> Optional[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM orchestration_traces WHERE trace_id = ?", (trace_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return {
+                "trace_id": row["trace_id"],
+                "initiative": row["initiative"],
+                "status": row["status"],
+                "total_cost_usd": row["total_cost_usd"],
+                "total_tokens": row["total_tokens"],
+                "duration_ms": row["duration_ms"],
+                "spans": json.loads(row["spans_json"]) if row["spans_json"] else [],
+                "created_at": row["created_at"],
+            }
+
+    def list_orchestration_traces(self, limit: int = 50) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM orchestration_traces ORDER BY created_at DESC LIMIT ?", (limit,))
+            rows = cursor.fetchall()
+            return [
+                {
+                    "trace_id": r["trace_id"],
+                    "initiative": r["initiative"],
+                    "status": r["status"],
+                    "total_cost_usd": r["total_cost_usd"],
+                    "total_tokens": r["total_tokens"],
+                    "duration_ms": r["duration_ms"],
+                    "spans": json.loads(r["spans_json"]) if r["spans_json"] else [],
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+    def save_debate_record(self, debate: Dict[str, Any]):
+        with self.get_connection() as conn:
+            conn.execute("""
+            INSERT OR REPLACE INTO orchestration_debates (
+                debate_id, topic, role_a, role_b, consensus_score, is_approved, verdict_json, rounds_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                debate["debate_id"],
+                debate["topic"],
+                debate["role_a"],
+                debate["role_b"],
+                debate["verdict"]["consensus_score"],
+                1 if debate["verdict"]["is_approved"] else 0,
+                json.dumps(debate["verdict"]),
+                json.dumps(debate.get("rounds", [])),
+                debate.get("created_at", time.time()),
+            ))
+            conn.commit()
+
+    def get_debate_record(self, debate_id: str) -> Optional[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM orchestration_debates WHERE debate_id = ?", (debate_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return {
+                "debate_id": row["debate_id"],
+                "topic": row["topic"],
+                "role_a": row["role_a"],
+                "role_b": row["role_b"],
+                "consensus_score": row["consensus_score"],
+                "is_approved": bool(row["is_approved"]),
+                "verdict": json.loads(row["verdict_json"]) if row["verdict_json"] else {},
+                "rounds": json.loads(row["rounds_json"]) if row["rounds_json"] else [],
+                "created_at": row["created_at"],
+            }
+
+    def list_debate_records(self, limit: int = 50) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM orchestration_debates ORDER BY created_at DESC LIMIT ?", (limit,))
+            rows = cursor.fetchall()
+            return [
+                {
+                    "debate_id": r["debate_id"],
+                    "topic": r["topic"],
+                    "role_a": r["role_a"],
+                    "role_b": r["role_b"],
+                    "consensus_score": r["consensus_score"],
+                    "is_approved": bool(r["is_approved"]),
+                    "verdict": json.loads(r["verdict_json"]) if r["verdict_json"] else {},
+                    "rounds": json.loads(r["rounds_json"]) if r["rounds_json"] else [],
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+    def save_sop_bundle(self, bundle: Dict[str, Any]):
+        with self.get_connection() as conn:
+            conn.execute("""
+            INSERT OR REPLACE INTO orchestration_artifacts (
+                bundle_id, initiative, prd_json, architecture_json, financial_json, gtm_json, security_json, runbook_json, is_fully_signed_off, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                bundle["bundle_id"],
+                bundle["initiative"],
+                json.dumps(bundle.get("prd")),
+                json.dumps(bundle.get("architecture_spec")),
+                json.dumps(bundle.get("financial_model")),
+                json.dumps(bundle.get("gtm_plan")),
+                json.dumps(bundle.get("security_assessment")),
+                json.dumps(bundle.get("runbook")),
+                1 if bundle.get("is_fully_signed_off") else 0,
+                bundle.get("created_at", time.time()),
+            ))
+            conn.commit()
+
+    def get_sop_bundle(self, bundle_id: str) -> Optional[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.execute("SELECT * FROM orchestration_artifacts WHERE bundle_id = ?", (bundle_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return {
+                "bundle_id": row["bundle_id"],
+                "initiative": row["initiative"],
+                "prd": json.loads(row["prd_json"]) if row["prd_json"] else None,
+                "architecture_spec": json.loads(row["architecture_json"]) if row["architecture_json"] else None,
+                "financial_model": json.loads(row["financial_json"]) if row["financial_json"] else None,
+                "gtm_plan": json.loads(row["gtm_json"]) if row["gtm_json"] else None,
+                "security_assessment": json.loads(row["security_json"]) if row["security_json"] else None,
+                "runbook": json.loads(row["runbook_json"]) if row["runbook_json"] else None,
+                "is_fully_signed_off": bool(row["is_fully_signed_off"]),
+                "created_at": row["created_at"],
+            }
+
 

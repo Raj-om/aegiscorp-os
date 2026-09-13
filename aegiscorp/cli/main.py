@@ -394,7 +394,190 @@ def encyclopedia(
         )
     console.print(table)
 
+@app.command()
+def orchestrate(
+    initiative: str = typer.Option("Autonomous Global Multi-Cloud Expansion", "--initiative", "-i", help="Strategic initiative title"),
+    budget: float = typer.Option(10_000_000.0, "--budget", "-b", help="Total capital allocation budget"),
+    debate: str = typer.Option("governance", "--debate", "-d", help="Debate pairing (governance, revenue_risk, security_speed, product_debt, quality_speed)"),
+):
+    """Execute end-to-end multi-agent orchestration (ACL, Dialectic Debate, MetaGPT SOPs, CrewAI Delegation, AgentOps Telemetry)."""
+    from aegiscorp.orchestration import EnterpriseOrchestrator
+
+    console.print(f"[bold cyan]Launching Enterprise Orchestration for:[/bold cyan] [bold yellow]{initiative}[/bold yellow] (Budget: ${budget:,.0f})...")
+    orch = EnterpriseOrchestrator()
+    res = orch.orchestrate_initiative(initiative=initiative, capital_budget=budget, debate_pairing=debate)
+
+    # 1. Overview Panel
+    console.print(Panel.fit(
+        f"[bold white]Orchestration ID:[/bold white] {res.orchestration_id}\n"
+        f"[bold white]Trace ID:[/bold white] {res.trace.trace_id}\n"
+        f"[bold green]Status:[/bold green] {res.status}\n"
+        f"[bold yellow]Total Compute Spend:[/bold yellow] ${res.total_compute_cost_usd:.5f} USD\n"
+        f"[bold cyan]Tokens Consumed:[/bold cyan] {res.total_tokens_consumed:,}\n"
+        f"[bold magenta]Consensus Score:[/bold magenta] {res.dialectic_debate.verdict.consensus_score}/100.0 (Approved: {res.dialectic_debate.verdict.is_approved})\n"
+        f"[bold white]Artifacts Signed Off:[/bold white] {res.artifact_bundle.is_fully_signed_off}",
+        title="[Enterprise Orchestration] Run Summary",
+        border_style="green",
+    ))
+
+    # 2. Delegated Tasks Table
+    del_table = Table(title="CrewAI-Style Dynamic Skill-Based Task Delegation")
+    del_table.add_column("Workstream Task", style="cyan")
+    del_table.add_column("Department", style="white")
+    del_table.add_column("Assigned Role", style="green")
+    del_table.add_column("Medal Tier", justify="center", style="yellow")
+    del_table.add_column("Score", justify="right", style="magenta")
+
+    for d in res.delegated_assignments:
+        del_table.add_row(
+            d["task"],
+            d["department"],
+            f"{d['assigned_role_title']} ({d['assigned_role_id']})",
+            d["medal_tier"],
+            f"{d['composite_score']:.1f}",
+        )
+    console.print(del_table)
+
+    # 3. Dialectic Debate Summary
+    console.print(Panel.fit(
+        f"[bold white]Topic:[/bold white] {res.dialectic_debate.topic}\n"
+        f"[bold cyan]Participants:[/bold cyan] {res.dialectic_debate.role_a.upper()} vs {res.dialectic_debate.role_b.upper()}\n"
+        f"[bold green]Executive Consensus:[/bold green] {res.dialectic_debate.verdict.executive_summary}\n\n"
+        f"[bold yellow]Agreed Compromises:[/bold yellow]\n" + "\n".join(f"  * {c}" for c in res.dialectic_debate.verdict.agreed_compromises),
+        title="[ChatDev Dialectic] Executive Peer Review Outcome",
+        border_style="cyan",
+    ))
+
+@app.command()
+def debate(
+    roles: str = typer.Option("board,ceo", "--roles", "-r", help="Comma-separated role IDs (e.g. board,ceo or ciso,cto)"),
+    topic: str = typer.Option("Zero-Downtime Distributed Migration Under Extreme Volatility", "--topic", "-t", help="Debate topic"),
+    rounds: int = typer.Option(3, "--rounds", help="Number of ping-pong debate rounds"),
+):
+    """Execute ChatDev-style pairwise dialectic debate between complementary corporate roles."""
+    from aegiscorp.orchestration import DialecticDebateEngine
+
+    pair = [r.strip().lower() for r in roles.split(",")]
+    if len(pair) != 2:
+        console.print("[red]Error: Please specify exactly two comma-separated role IDs, e.g. --roles board,ceo[/red]")
+        return
+
+    engine = DialecticDebateEngine()
+    rec = engine.run_debate(role_a_id=pair[0], role_b_id=pair[1], topic=topic, num_rounds=rounds)
+
+    console.print(f"\n[bold magenta]=== Dialectic Peer Review Debate: {rec.role_a.upper()} <--> {rec.role_b.upper()} ===[/bold magenta]")
+    console.print(f"[bold cyan]Topic:[/bold cyan] {rec.topic}\n")
+
+    for rnd in rec.rounds:
+        console.print(f"[bold yellow]--- Round {rnd.round_number} ---[/bold yellow]")
+        console.print(f"[bold green]{rnd.turn_a.speaker_title} ({rnd.turn_a.argument_type}):[/bold green]")
+        console.print(f"  {rnd.turn_a.content}\n")
+        console.print(f"[bold cyan]{rnd.turn_b.speaker_title} ({rnd.turn_b.argument_type}):[/bold cyan]")
+        console.print(f"  {rnd.turn_b.content}\n")
+
+    console.print(Panel.fit(
+        f"[bold white]Consensus Score:[/bold white] {rec.verdict.consensus_score}/100.0\n"
+        f"[bold green]Approved:[/bold green] {rec.verdict.is_approved}\n\n"
+        f"[bold yellow]Binding Conditions:[/bold yellow]\n" + "\n".join(f"  - {c}" for c in rec.verdict.binding_conditions) + "\n\n"
+        f"[bold white]Executive Summary:[/bold white] {rec.verdict.executive_summary}",
+        title="[Debate Verdict & Resolution]",
+        border_style="green" if rec.verdict.is_approved else "red",
+    ))
+
+@app.command()
+def sop(
+    initiative: str = typer.Option("Global Enterprise AI Modernization", "--initiative", "-i", help="Corporate initiative title"),
+    type: str = typer.Option("all", "--type", "-t", help="Artifact type: all, prd, architecture, financial, gtm, security, runbook"),
+    budget: float = typer.Option(10_000_000.0, "--budget", "-b", help="Initiative budget in USD"),
+):
+    """Generate MetaGPT-style formal Standard Operating Procedure corporate artifacts."""
+    from aegiscorp.orchestration import SOPPipeline
+
+    pipe = SOPPipeline()
+    console.print(f"[bold cyan]Generating MetaGPT SOP Artifacts for:[/bold cyan] [bold yellow]{initiative}[/bold yellow]...")
+
+    if type == "prd" or type == "all":
+        prd = pipe.generate_prd(initiative, budget)
+        console.print(Panel.fit(
+            f"[bold white]Title:[/bold white] {prd.title}\n"
+            f"[bold green]Owner:[/bold green] {prd.owner_role.upper()}\n"
+            f"[bold cyan]Problem Statement:[/bold cyan] {prd.problem_statement}\n"
+            f"[bold yellow]P0 Features:[/bold yellow]\n" + "\n".join(f"  * {f}" for f in prd.p0_features) + "\n"
+            f"[bold magenta]Acceptance Criteria:[/bold magenta]\n" + "\n".join(f"  - {c}" for c in prd.acceptance_criteria),
+            title="[MetaGPT SOP] Product Requirement Document (PRD)",
+            border_style="cyan",
+        ))
+
+    if type == "architecture" or type == "all":
+        prd_obj = pipe.generate_prd(initiative, budget)
+        arch = pipe.generate_architecture_spec(initiative, prd_obj)
+        console.print(Panel.fit(
+            f"[bold white]Title:[/bold white] {arch.title}\n"
+            f"[bold green]Architecture Style:[/bold green] {arch.architecture_style}\n"
+            f"[bold cyan]Security Perimeter:[/bold cyan] {arch.security_boundary}\n"
+            f"[bold yellow]SLOs:[/bold yellow] P50={arch.latency_slos.get('P50')}, P95={arch.latency_slos.get('P95')}, P99={arch.latency_slos.get('P99')}\n"
+            f"[bold magenta]C4 Containers:[/bold magenta]\n" + "\n".join(f"  * {c['name']}: {c['role']}" for c in arch.c4_containers),
+            title="[MetaGPT SOP] System Architecture Specification",
+            border_style="green",
+        ))
+
+    if type == "financial" or type == "all":
+        fin = pipe.generate_financial_model(initiative, budget)
+        console.print(Panel.fit(
+            f"[bold white]Title:[/bold white] {fin.title}\n"
+            f"[bold green]Capital Allocation:[/bold green] ${fin.capital_allocation_usd:,.2f} USD\n"
+            f"[bold yellow]CapEx:[/bold yellow] ${fin.capex_usd:,.2f} | [bold yellow]Monthly OpEx:[/bold yellow] ${fin.opex_monthly_usd:,.2f}\n"
+            f"[bold cyan]Projected ROI:[/bold cyan] {fin.projected_roi_percent}% | [bold cyan]IRR:[/bold cyan] {fin.irr_percent}%\n"
+            f"[bold magenta]Payback Period:[/bold magenta] {fin.payback_period_months} months (Hurdle Met: {fin.hurdle_rate_met})",
+            title="[MetaGPT SOP] Financial Viability & CapEx Model",
+            border_style="yellow",
+        ))
+
+@app.command()
+def telemetry(
+    departmental: bool = typer.Option(True, "--departmental", "-d", help="Display departmental compute P&L breakdown"),
+):
+    """Display AgentOps-style enterprise observability and departmental AI spend."""
+    from aegiscorp.orchestration import AgentOpsObservability
+
+    obs = AgentOpsObservability()
+    dept_stats = obs.get_departmental_telemetry()
+
+    table = Table(title="AgentOps Enterprise Observability -- Departmental AI Compute P&L")
+    table.add_column("Department", style="cyan")
+    table.add_column("Tokens Consumed", justify="right", style="white")
+    table.add_column("Spend (USD)", justify="right", style="bold yellow")
+    table.add_column("Operations", justify="right", style="green")
+    table.add_column("Avg Latency", justify="right", style="cyan")
+    table.add_column("P99 Latency", justify="right", style="magenta")
+    table.add_column("Error Rate", justify="right", style="red")
+
+    total_spend = 0.0
+    total_tokens = 0
+
+    for dept, s in dept_stats.items():
+        total_spend += s.total_spend_usd
+        total_tokens += s.total_tokens
+        table.add_row(
+            dept,
+            f"{s.total_tokens:,}",
+            f"${s.total_spend_usd:.4f}",
+            str(s.total_operations),
+            f"{s.avg_latency_ms} ms",
+            f"{s.p99_latency_ms} ms",
+            f"{s.error_rate_pct:.3f}%",
+        )
+
+    console.print(table)
+    console.print(Panel.fit(
+        f"[bold white]Total Enterprise AI Spend:[/bold white] [bold yellow]${total_spend:.4f} USD[/bold yellow]\n"
+        f"[bold white]Total Tokens Processed:[/bold white] [bold cyan]{total_tokens:,} tokens[/bold cyan]\n"
+        f"[bold green]System Status:[/bold green] 100% Operational | Least Privilege ACL Active",
+        title="[AgentOps Telemetry Summary]",
+        border_style="green",
+    ))
 
 if __name__ == "__main__":
     app()
+
 

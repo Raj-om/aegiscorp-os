@@ -32,6 +32,13 @@ from aegiscorp.training import (
     search_encyclopedia,
     CloudTrainingOrchestrator,
 )
+from aegiscorp.orchestration import (
+    EnterpriseOrchestrator,
+    DialecticDebateEngine,
+    SOPPipeline,
+    CommunicationACL,
+    AgentOpsObservability,
+)
 from aegiscorp.ui import INDEX_HTML
 
 def create_app() -> FastAPI:
@@ -71,6 +78,10 @@ def create_app() -> FastAPI:
     training_engine = TrainingTournamentEngine(db=db)
     apps_connector = AwesomeLLMAppsConnector(policy_engine=policy_engine)
     cloud_trainer = CloudTrainingOrchestrator(db=db, tournament_engine=training_engine)
+    enterprise_orchestrator = EnterpriseOrchestrator(db=db)
+    dialectic_engine = DialecticDebateEngine()
+    sop_pipeline = SOPPipeline()
+    observability = AgentOpsObservability(db=db)
 
     # Seed initial digital twin state
     company_state = get_default_company_state()
@@ -467,6 +478,133 @@ def create_app() -> FastAPI:
                 }
         except ValueError as ve:
             raise HTTPException(status_code=400, detail=str(ve))
+
+    # -------------------------------------------------------------
+    # ENTERPRISE MULTI-AGENT ORCHESTRATION ENDPOINTS
+    # -------------------------------------------------------------
+
+    class OrchestrationInitiativePayload(BaseModel):
+        initiative: str
+        capital_budget: float = 10_000_000.0
+        debate_pairing: str = "governance"
+
+    class SOPGeneratePayload(BaseModel):
+        initiative: str
+        budget: float = 10_000_000.0
+        artifact_type: Optional[str] = "all"  # all, prd, architecture, financial, gtm, security, runbook
+
+    class DialecticDebatePayload(BaseModel):
+        role_a: str
+        role_b: str
+        topic: str
+        rounds: int = 3
+        capital_amount: float = 0.0
+
+    @app.post("/orchestration/initiative")
+    def run_orchestration_initiative(payload: OrchestrationInitiativePayload):
+        try:
+            res = enterprise_orchestrator.orchestrate_initiative(
+                initiative=payload.initiative,
+                capital_budget=payload.capital_budget,
+                debate_pairing=payload.debate_pairing,
+            )
+            db.record_event(
+                event_id=f"evt_{uuid.uuid4().hex[:10]}",
+                event_type="orchestration_initiative_completed",
+                aggregate_id=res.orchestration_id,
+                actor="enterprise_orchestrator",
+                payload={
+                    "initiative": payload.initiative,
+                    "cost_usd": res.total_compute_cost_usd,
+                    "tokens": res.total_tokens_consumed,
+                    "consensus_score": res.dialectic_debate.verdict.consensus_score,
+                },
+            )
+            return res.model_dump()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/orchestration/sop/generate")
+    def generate_sop_artifacts(payload: SOPGeneratePayload):
+        if payload.artifact_type == "prd":
+            prd = sop_pipeline.generate_prd(payload.initiative, payload.budget)
+            return prd.model_dump()
+        elif payload.artifact_type == "architecture":
+            prd = sop_pipeline.generate_prd(payload.initiative, payload.budget)
+            arch = sop_pipeline.generate_architecture_spec(payload.initiative, prd)
+            return arch.model_dump()
+        elif payload.artifact_type == "financial":
+            fin = sop_pipeline.generate_financial_model(payload.initiative, payload.budget)
+            return fin.model_dump()
+        elif payload.artifact_type == "gtm":
+            prd = sop_pipeline.generate_prd(payload.initiative, payload.budget)
+            gtm = sop_pipeline.generate_gtm_plan(payload.initiative, prd)
+            return gtm.model_dump()
+        elif payload.artifact_type == "security":
+            prd = sop_pipeline.generate_prd(payload.initiative, payload.budget)
+            arch = sop_pipeline.generate_architecture_spec(payload.initiative, prd)
+            sec = sop_pipeline.generate_security_assessment(payload.initiative, arch)
+            return sec.model_dump()
+        elif payload.artifact_type == "runbook":
+            prd = sop_pipeline.generate_prd(payload.initiative, payload.budget)
+            arch = sop_pipeline.generate_architecture_spec(payload.initiative, prd)
+            rb = sop_pipeline.generate_runbook(payload.initiative, arch)
+            return rb.model_dump()
+        else:
+            bundle = sop_pipeline.execute_sop_pipeline(payload.initiative, payload.budget)
+            return bundle.model_dump()
+
+    @app.post("/orchestration/dialectic/run")
+    def run_dialectic_debate(payload: DialecticDebatePayload):
+        try:
+            record = dialectic_engine.run_debate(
+                role_a_id=payload.role_a,
+                role_b_id=payload.role_b,
+                topic=payload.topic,
+                num_rounds=payload.rounds,
+                capital_amount=payload.capital_amount,
+            )
+            db.save_debate_record(record.model_dump())
+            return record.model_dump()
+        except ValueError as ve:
+            raise HTTPException(status_code=400, detail=str(ve))
+
+    @app.get("/orchestration/debates")
+    def list_debates(limit: int = 50):
+        return db.list_debate_records(limit=limit)
+
+    @app.get("/orchestration/debates/{debate_id}")
+    def get_debate(debate_id: str):
+        rec = db.get_debate_record(debate_id)
+        if not rec:
+            raise HTTPException(status_code=404, detail=f"Debate record '{debate_id}' not found.")
+        return rec
+
+    @app.get("/orchestration/traces")
+    def list_traces(limit: int = 50):
+        return db.list_orchestration_traces(limit=limit)
+
+    @app.get("/orchestration/traces/{trace_id}")
+    def get_trace(trace_id: str):
+        tr = db.get_orchestration_trace(trace_id)
+        if not tr:
+            raise HTTPException(status_code=404, detail=f"Trace '{trace_id}' not found.")
+        return tr
+
+    @app.get("/orchestration/telemetry/departmental")
+    def get_departmental_telemetry():
+        res = observability.get_departmental_telemetry()
+        return {k: v.model_dump() for k, v in res.items()}
+
+    @app.get("/orchestration/acl/check")
+    def check_communication_acl(sender: str, recipient: str, emergency: bool = False, topic: str = ""):
+        res = CommunicationACL.evaluate_message_route(
+            sender_role_id=sender,
+            recipient_role_id=recipient,
+            is_emergency_flag=emergency,
+            message_topic=topic,
+        )
+        return res.model_dump()
 
     return app
 

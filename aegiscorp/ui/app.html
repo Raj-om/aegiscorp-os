@@ -68,6 +68,7 @@
     <button onclick="switchTab('command-center')" id="tab-command-center" class="tab-btn active py-3.5 hover:text-slate-200 transition-colors">Command Center</button>
     <button onclick="switchTab('org-chart')" id="tab-org-chart" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Org Hierarchy (48 Roles)</button>
     <button onclick="switchTab('csuite-rooms')" id="tab-csuite-rooms" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">C-Suite Rooms</button>
+    <button onclick="switchTab('orchestration')" id="tab-orchestration" class="tab-btn py-3.5 hover:text-slate-200 transition-colors text-cyan-400 font-semibold">Enterprise Orchestration</button>
     <button onclick="switchTab('academy')" id="tab-academy" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Agent Academy & Training</button>
     <button onclick="switchTab('decisions-inbox')" id="tab-decisions-inbox" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">Decision Inbox & Gates</button>
     <button onclick="switchTab('kpi-tower')" id="tab-kpi-tower" class="tab-btn py-3.5 hover:text-slate-200 transition-colors">KPI Control Tower</button>
@@ -506,6 +507,206 @@
       </div>
     </div>
 
+    <!-- TAB: ENTERPRISE ORCHESTRATION & DIALECTIC MESH -->
+    <div id="view-orchestration" class="space-y-6 hidden">
+      <!-- Header Banner -->
+      <div class="glass-card p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-indigo-900/40">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+              Enterprise Multi-Agent Orchestration Mesh
+              <span class="text-xs font-normal px-2.5 py-0.5 rounded bg-indigo-900/80 text-indigo-300 border border-indigo-700">MetaGPT • ChatDev • CrewAI • Agency Swarm • AgentOps</span>
+            </h1>
+            <p class="text-sm text-slate-400 mt-1 max-w-3xl">
+              End-to-end governed execution pipeline uniting MetaGPT Standard Operating Procedures (SOPs), ChatDev Dialectic Peer Review, Agency Swarm Org-Chart ACLs, CrewAI Dynamic Skill Delegation, and AgentOps Real-Time Telemetry.
+            </p>
+          </div>
+          <button onclick="executeUIFullOrchestration()" id="btnRunOrchestration" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2">
+            <span>⚡</span> Launch Governed Initiative
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Departmental AI Compute P&L (AgentOps) -->
+      <div class="glass-card p-5 rounded-xl space-y-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="text-cyan-400">●</span> Departmental AI Compute P&L & Token Telemetry (AgentOps)
+            </h2>
+            <p class="text-xs text-slate-400">Granular compute cost attribution, token throughput, and latency tracking per enterprise department.</p>
+          </div>
+          <button onclick="loadUIDepartmentalSpend()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-cyan-300 border border-slate-700 transition-all">
+            Refresh P&L
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400">TOTAL AI COMPUTE SPEND</div>
+            <div class="text-xl font-bold text-amber-400 mt-1" id="orchTotalSpend">$4.0460 USD</div>
+            <div class="text-[10px] text-emerald-400 mt-1">● Cost per 1K Tokens: $0.00185</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400">TOTAL TOKENS PROCESSED</div>
+            <div class="text-xl font-bold text-cyan-400 mt-1" id="orchTotalTokens">2,187,000</div>
+            <div class="text-[10px] text-slate-400 mt-1">Prompt + Completion Mesh</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400">AVG PIPELINE LATENCY</div>
+            <div class="text-xl font-bold text-emerald-400 mt-1" id="orchAvgLatency">37.5 ms</div>
+            <div class="text-[10px] text-cyan-400 mt-1">P99 SLA: &lt; 150 ms</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400">GOVERNANCE & ACL STATUS</div>
+            <div class="text-xl font-bold text-indigo-400 mt-1">STRICT ENFORCED</div>
+            <div class="text-[10px] text-emerald-400 mt-1">● Least Privilege & Whistleblower OK</div>
+          </div>
+        </div>
+
+        <!-- Department Breakdown Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-900/80 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2.5 px-4">Department</th>
+                <th class="py-2.5 px-4 text-right">Tokens Consumed</th>
+                <th class="py-2.5 px-4 text-right">Spend (USD)</th>
+                <th class="py-2.5 px-4 text-right">Operations</th>
+                <th class="py-2.5 px-4 text-right">Avg Latency</th>
+                <th class="py-2.5 px-4 text-right">P99 Latency</th>
+                <th class="py-2.5 px-4 text-right">Error Rate</th>
+              </tr>
+            </thead>
+            <tbody id="orchDepartmentalSpendBody" class="divide-y divide-slate-800/60 text-slate-300">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ChatDev-Style Dialectic Peer Review Debate Simulator -->
+      <div class="glass-card p-5 rounded-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="text-indigo-400">●</span> ChatDev-Style Dialectic Peer Review Simulator
+            </h2>
+            <p class="text-xs text-slate-400">Simulate multi-turn adversarial ping-pong cross-examination between complementary corporate roles.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="debatePairPreset" onchange="applyDebatePreset(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-cyan-300 font-mono">
+              <option value="governance">Preset: Board vs CEO (Fiduciary & Capital)</option>
+              <option value="revenue_risk">Preset: CFO vs CRO (Revenue vs Churn)</option>
+              <option value="security_speed">Preset: CISO vs CTO (Zero Trust vs Speed)</option>
+              <option value="product_debt">Preset: CPO vs CTO (Features vs Tech Debt)</option>
+              <option value="quality_speed">Preset: QA Lead vs Lead Dev (Test Rigor)</option>
+            </select>
+            <button onclick="runUIDialecticDebate()" id="btnRunDebate" class="px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white rounded-lg text-xs font-semibold shadow transition-all">
+              Run Debate
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-3 space-y-3">
+            <div>
+              <label class="text-[10px] font-mono text-slate-400">Challenger (Speaker A):</label>
+              <input id="debateRoleA" type="text" value="board" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono mt-1" />
+            </div>
+            <div>
+              <label class="text-[10px] font-mono text-slate-400">Defender (Speaker B):</label>
+              <input id="debateRoleB" type="text" value="ceo" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono mt-1" />
+            </div>
+            <div>
+              <label class="text-[10px] font-mono text-slate-400">Debate Topic:</label>
+              <textarea id="debateTopicInput" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-300 font-mono mt-1">Autonomous Global Multi-Cloud Enterprise Expansion</textarea>
+            </div>
+            <div id="debateVerdictCard" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-2 hidden">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+          <div class="md:col-span-9 p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center text-xs font-mono border-b border-slate-800 pb-2">
+              <span class="font-bold text-slate-300">LIVE DEBATE TRANSCRIPT</span>
+              <span class="text-cyan-400" id="debateRoundIndicator">Ready to Simulate</span>
+            </div>
+            <div id="debateTranscriptBox" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+              <div class="text-slate-500 text-xs italic">Click 'Run Debate' to initiate multi-turn dialectic challenge/response cycle...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MetaGPT-Style Corporate SOP Artifact Explorer -->
+      <div class="glass-card p-5 rounded-xl space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="text-purple-400">●</span> MetaGPT-Style Corporate SOP Artifact Explorer
+            </h2>
+            <p class="text-xs text-slate-400">Inspect structured business deliverables produced by C-suite roles prior to execution gating.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="generateUISOPArtifacts('all')" class="px-3 py-1.5 bg-purple-900/70 hover:bg-purple-800 text-purple-200 border border-purple-700 rounded-lg text-xs font-mono transition-all">
+              Generate All 6 Artifacts
+            </button>
+          </div>
+        </div>
+
+        <div class="flex space-x-2 border-b border-slate-800 overflow-x-auto text-xs font-mono pb-2">
+          <button onclick="switchSOPArtifactTab('prd')" id="sopTab-prd" class="px-3 py-1 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold">1. PRD (CPO)</button>
+          <button onclick="switchSOPArtifactTab('architecture')" id="sopTab-architecture" class="px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">2. Architecture (CTO)</button>
+          <button onclick="switchSOPArtifactTab('financial')" id="sopTab-financial" class="px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">3. Financial Model (CFO)</button>
+          <button onclick="switchSOPArtifactTab('gtm')" id="sopTab-gtm" class="px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">4. GTM Plan (CRO)</button>
+          <button onclick="switchSOPArtifactTab('security')" id="sopTab-security" class="px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">5. Security Audit (CISO)</button>
+          <button onclick="switchSOPArtifactTab('runbook')" id="sopTab-runbook" class="px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">6. Runbook (COO)</button>
+        </div>
+
+        <div id="sopArtifactContent" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono space-y-3">
+          <div class="text-slate-500 animate-pulse">Click 'Generate All 6 Artifacts' or an individual tab to view formal business deliverables...</div>
+        </div>
+      </div>
+
+      <!-- Agency Swarm Org-Chart Communication ACL Tester -->
+      <div class="glass-card p-5 rounded-xl space-y-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="text-sky-400">●</span> Agency Swarm Org-Chart Communication ACL Tester
+            </h2>
+            <p class="text-xs text-slate-400">Verify organizational reporting constraints, prevent unauthorized rank bypasses, and validate whistleblower paths.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          <div>
+            <label class="text-[10px] font-mono text-slate-400">Sender Role ID:</label>
+            <input id="aclSenderInput" type="text" value="swe_junior" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono mt-1" />
+          </div>
+          <div>
+            <label class="text-[10px] font-mono text-slate-400">Recipient Role ID:</label>
+            <input id="aclRecipientInput" type="text" value="board" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono mt-1" />
+          </div>
+          <div class="flex items-center space-x-2 pt-2">
+            <input id="aclEmergencyCheckbox" type="checkbox" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0" />
+            <label for="aclEmergencyCheckbox" class="text-xs text-slate-300 font-mono">Whistleblower Emergency</label>
+          </div>
+          <div>
+            <button onclick="checkUICommunicationACL()" class="w-full px-4 py-2 bg-slate-800 hover:bg-sky-900 text-sky-300 border border-slate-700 hover:border-sky-600 rounded-lg text-xs font-mono font-bold transition-all">
+              Test Communication Route
+            </button>
+          </div>
+        </div>
+
+        <div id="aclTestOutcome" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono space-y-1">
+          <div class="text-slate-400">Enter roles above and click 'Test Communication Route' to verify hierarchy bounds.</div>
+        </div>
+      </div>
+
+    </div>
+
   </main>
 
   <footer class="border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500">
@@ -517,7 +718,7 @@
     const API_BASE = window.location.origin;
 
     function switchTab(tabId) {
-      const tabs = ['command-center', 'org-chart', 'csuite-rooms', 'academy', 'decisions-inbox', 'kpi-tower', 'research-center', 'investments', 'simulation', 'audit-ledger'];
+      const tabs = ['command-center', 'org-chart', 'csuite-rooms', 'orchestration', 'academy', 'decisions-inbox', 'kpi-tower', 'research-center', 'investments', 'simulation', 'audit-ledger'];
       tabs.forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         document.getElementById(`tab-${t}`).classList.remove('active');
@@ -527,6 +728,7 @@
 
       if (tabId === 'org-chart') loadOrgChart();
       if (tabId === 'csuite-rooms') loadCSuite();
+      if (tabId === 'orchestration') loadOrchestrationView();
       if (tabId === 'academy') loadAcademy();
       if (tabId === 'decisions-inbox') loadDecisions();
       if (tabId === 'kpi-tower') loadKPIs();
@@ -1272,6 +1474,382 @@
       } finally {
         btn.innerHTML = origText;
         btn.disabled = false;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // ENTERPRISE ORCHESTRATION CLIENT LOGIC
+    // -------------------------------------------------------------
+
+    let currentSOPBundle = null;
+
+    async function loadOrchestrationView() {
+      await loadUIDepartmentalSpend();
+    }
+
+    async function loadUIDepartmentalSpend() {
+      try {
+        const res = await fetch(`${API_BASE}/orchestration/telemetry/departmental`);
+        const data = await res.json();
+        const tbody = document.getElementById('orchDepartmentalSpendBody');
+        tbody.innerHTML = '';
+
+        let totalSpend = 0.0;
+        let totalTokens = 0;
+        let latencies = [];
+
+        Object.values(data).forEach(d => {
+          totalSpend += d.total_spend_usd;
+          totalTokens += d.total_tokens;
+          latencies.push(d.avg_latency_ms);
+
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-900/60 transition-colors';
+          tr.innerHTML = `
+            <td class="py-2.5 px-4 font-bold text-white">${d.department}</td>
+            <td class="py-2.5 px-4 text-right text-cyan-300">${d.total_tokens.toLocaleString()}</td>
+            <td class="py-2.5 px-4 text-right font-bold text-amber-400">$${d.total_spend_usd.toFixed(4)}</td>
+            <td class="py-2.5 px-4 text-right text-slate-300">${d.total_operations}</td>
+            <td class="py-2.5 px-4 text-right text-slate-400">${d.avg_latency_ms} ms</td>
+            <td class="py-2.5 px-4 text-right text-indigo-400">${d.p99_latency_ms} ms</td>
+            <td class="py-2.5 px-4 text-right text-emerald-400">${d.error_rate_pct.toFixed(3)}%</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('orchTotalSpend').innerText = `$${totalSpend.toFixed(4)} USD`;
+        document.getElementById('orchTotalTokens').innerText = totalTokens.toLocaleString();
+        const avgLat = (latencies.reduce((a, b) => a + b, 0) / (latencies.length || 1)).toFixed(1);
+        document.getElementById('orchAvgLatency').innerText = `${avgLat} ms`;
+      } catch (e) {
+        console.error("Failed to load departmental spend", e);
+      }
+    }
+
+    function applyDebatePreset(preset) {
+      const presets = {
+        governance: { a: 'board', b: 'ceo', topic: 'Autonomous Global Multi-Cloud Enterprise Expansion' },
+        revenue_risk: { a: 'cfo', b: 'cro', topic: 'Aggressive Enterprise Sales Quota and Discounting Limits' },
+        security_speed: { a: 'ciso', b: 'cto', topic: 'Zero-Trust HSM Isolation vs Continuous Deployment Velocity' },
+        product_debt: { a: 'cpo', b: 'cto', topic: 'AI Agent Dynamic Workflows vs Architectural Stability' },
+        quality_speed: { a: 'qa_lead', b: 'lead_dev', topic: 'Mandatory 100% Mutation Testing Before Production Merges' },
+      };
+      const p = presets[preset];
+      if (p) {
+        document.getElementById('debateRoleA').value = p.a;
+        document.getElementById('debateRoleB').value = p.b;
+        document.getElementById('debateTopicInput').value = p.topic;
+      }
+    }
+
+    async function runUIDialecticDebate() {
+      const roleA = document.getElementById('debateRoleA').value.trim();
+      const roleB = document.getElementById('debateRoleB').value.trim();
+      const topic = document.getElementById('debateTopicInput').value.trim();
+      const btn = document.getElementById('btnRunDebate');
+      const box = document.getElementById('debateTranscriptBox');
+      const ind = document.getElementById('debateRoundIndicator');
+      const card = document.getElementById('debateVerdictCard');
+
+      btn.disabled = true;
+      btn.innerText = 'Debating...';
+      ind.innerText = 'Ping-Pong Dialectic In Progress...';
+      box.innerHTML = '<div class="text-xs text-indigo-400 animate-pulse">Exchanging structured challenges, evidence claims, and concessions...</div>';
+
+      try {
+        const res = await fetch(`${API_BASE}/orchestration/dialectic/run`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({role_a: roleA, role_b: roleB, topic: topic, rounds: 3})
+        });
+        const d = await res.json();
+
+        box.innerHTML = '';
+        d.rounds.forEach(r => {
+          box.innerHTML += `
+            <div class="space-y-2 border-b border-slate-800/80 pb-3">
+              <div class="text-[10px] font-mono text-amber-400 font-bold">--- ROUND ${r.round_number} ---</div>
+              <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs space-y-1">
+                <div class="flex justify-between items-center text-[10px]">
+                  <span class="font-bold text-emerald-400">${r.turn_a.speaker_title} <span class="text-slate-500 font-normal font-mono">[${r.turn_a.argument_type}]</span></span>
+                  <span class="text-slate-500 font-mono">${r.turn_a.evidence_basis}</span>
+                </div>
+                <p class="text-slate-300 text-xs">${r.turn_a.content}</p>
+                ${r.turn_a.risk_highlight ? `<div class="text-[10px] text-rose-400 font-mono">⚠️ Risk: ${r.turn_a.risk_highlight}</div>` : ''}
+              </div>
+              <div class="p-3 rounded-lg bg-slate-900/90 border border-slate-800 text-xs space-y-1">
+                <div class="flex justify-between items-center text-[10px]">
+                  <span class="font-bold text-cyan-400">${r.turn_b.speaker_title} <span class="text-slate-500 font-normal font-mono">[${r.turn_b.argument_type}]</span></span>
+                  <span class="text-slate-500 font-mono">${r.turn_b.evidence_basis}</span>
+                </div>
+                <p class="text-slate-300 text-xs">${r.turn_b.content}</p>
+                ${r.turn_b.risk_highlight ? `<div class="text-[10px] text-amber-400 font-mono">⚡ Counter: ${r.turn_b.risk_highlight}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        ind.innerText = `Consensus Reached: ${d.verdict.consensus_score}/100`;
+        card.classList.remove('hidden');
+        card.innerHTML = `
+          <div class="font-bold text-white text-xs flex justify-between">
+            <span>Verdict: ${d.verdict.is_approved ? 'APPROVED' : 'REJECTED'}</span>
+            <span class="text-amber-400">${d.verdict.consensus_score} Pts</span>
+          </div>
+          <p class="text-[11px] text-slate-300">${d.verdict.executive_summary}</p>
+          <div class="text-[10px] text-amber-300">
+            <strong>Binding Conditions:</strong>
+            <ul class="list-disc pl-3 mt-1 space-y-0.5">
+              ${d.verdict.binding_conditions.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      } catch (e) {
+        box.innerHTML = `<div class="text-xs text-rose-400">Debate error: ${e.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Run Debate';
+      }
+    }
+
+    async function generateUISOPArtifacts(type = 'all') {
+      const topic = document.getElementById('debateTopicInput').value.trim() || 'Global Enterprise AI Expansion';
+      const container = document.getElementById('sopArtifactContent');
+      container.innerHTML = '<div class="text-xs text-purple-400 animate-pulse">Generating formal corporate deliverables via MetaGPT SOP pipeline...</div>';
+
+      try {
+        const res = await fetch(`${API_BASE}/orchestration/sop/generate`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({initiative: topic, budget: 10000000.0, artifact_type: 'all'})
+        });
+        currentSOPBundle = await res.json();
+        renderSOPArtifactContent('prd');
+      } catch (e) {
+        container.innerHTML = `<div class="text-xs text-rose-400">Failed to generate SOP artifacts: ${e.message}</div>`;
+      }
+    }
+
+    function switchSOPArtifactTab(tab) {
+      ['prd', 'architecture', 'financial', 'gtm', 'security', 'runbook'].forEach(t => {
+        const btn = document.getElementById(`sopTab-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'px-3 py-1 rounded bg-purple-950 text-purple-300 border border-purple-800 font-bold';
+          } else {
+            btn.className = 'px-3 py-1 rounded bg-slate-900 text-slate-400 hover:text-white';
+          }
+        }
+      });
+      renderSOPArtifactContent(tab);
+    }
+
+    function renderSOPArtifactContent(tab) {
+      const container = document.getElementById('sopArtifactContent');
+      if (!currentSOPBundle) {
+        container.innerHTML = '<div class="text-slate-500">Please click "Generate All 6 Artifacts" above to populate corporate deliverables.</div>';
+        return;
+      }
+
+      if (tab === 'prd') {
+        const p = currentSOPBundle.prd;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${p.title}</span>
+              <span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 text-xs">OWNER: ${p.owner_role.toUpperCase()}</span>
+            </div>
+            <div class="text-slate-300">${p.problem_statement}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+              <div class="p-3 rounded bg-slate-900 border border-slate-800">
+                <div class="font-bold text-amber-400 text-xs">P0 Features:</div>
+                <ul class="list-disc pl-4 text-[11px] text-slate-300 mt-1 space-y-1">
+                  ${p.p0_features.map(f => `<li>${f}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="p-3 rounded bg-slate-900 border border-slate-800">
+                <div class="font-bold text-emerald-400 text-xs">Acceptance Criteria:</div>
+                <ul class="list-disc pl-4 text-[11px] text-slate-300 mt-1 space-y-1">
+                  ${p.acceptance_criteria.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'architecture') {
+        const a = currentSOPBundle.architecture_spec;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${a.title}</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs">OWNER: ${a.owner_role.toUpperCase()}</span>
+            </div>
+            <div class="text-slate-300"><strong>Architecture Style:</strong> ${a.architecture_style}</div>
+            <div class="text-slate-400 text-xs"><strong>Security Boundary:</strong> ${a.security_boundary}</div>
+            <div class="text-cyan-400 text-xs"><strong>SLOs:</strong> P50: ${a.latency_slos.P50} | P95: ${a.latency_slos.P95} | P99: ${a.latency_slos.P99}</div>
+            <div class="pt-2">
+              <div class="font-bold text-white text-xs mb-1">C4 Container Layout:</div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                ${a.c4_containers.map(c => `
+                  <div class="p-2.5 rounded bg-slate-900 border border-slate-800 text-xs">
+                    <div class="font-bold text-cyan-300">${c.name}</div>
+                    <div class="text-slate-400 text-[11px]">${c.role}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'financial') {
+        const f = currentSOPBundle.financial_model;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${f.title}</span>
+              <span class="px-2 py-0.5 rounded bg-yellow-950 text-yellow-300 border border-yellow-800 text-xs">OWNER: ${f.owner_role.toUpperCase()}</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <div class="text-slate-400 text-[10px]">TOTAL CAPITAL</div>
+                <div class="font-bold text-white text-sm">$${f.capital_allocation_usd.toLocaleString()}</div>
+              </div>
+              <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <div class="text-slate-400 text-[10px]">PROJECTED ROI</div>
+                <div class="font-bold text-emerald-400 text-sm">${f.projected_roi_percent}%</div>
+              </div>
+              <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <div class="text-slate-400 text-[10px]">IRR</div>
+                <div class="font-bold text-cyan-400 text-sm">${f.irr_percent}%</div>
+              </div>
+              <div class="p-2.5 rounded bg-slate-900 border border-slate-800">
+                <div class="text-slate-400 text-[10px]">PAYBACK PERIOD</div>
+                <div class="font-bold text-amber-400 text-sm">${f.payback_period_months} Months</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'gtm') {
+        const g = currentSOPBundle.gtm_plan;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${g.title}</span>
+              <span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 text-xs">OWNER: ${g.owner_role.toUpperCase()}</span>
+            </div>
+            <div class="text-slate-300"><strong>Target ICP:</strong> ${g.ideal_customer_profile}</div>
+            <div class="text-xs text-slate-400">CAC: $${g.target_cac_usd.toLocaleString()} | Projected LTV: $${g.projected_ltv_usd.toLocaleString()} (LTV:CAC = ${g.ltv_to_cac_ratio}:1)</div>
+            <div class="font-bold text-xs text-white pt-2">Acquisition Milestones:</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              ${g.milestones.map(m => `
+                <div class="p-2.5 rounded bg-slate-900 border border-slate-800 text-xs">
+                  <span class="font-bold text-sky-400 font-mono">${m.quarter}:</span>
+                  <span class="text-slate-300 ml-1">${m.target}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (tab === 'security') {
+        const s = currentSOPBundle.security_assessment;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${s.title}</span>
+              <span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 text-xs">STATUS: ${s.audit_approval_status}</span>
+            </div>
+            <div class="text-slate-300"><strong>Threat Model:</strong> ${s.threat_model}</div>
+            <div class="text-xs text-emerald-400"><strong>Zero Trust Alignment:</strong> ${s.zero_trust_alignment}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+              <div class="p-3 rounded bg-slate-900 border border-slate-800">
+                <div class="font-bold text-rose-400 text-xs">Identified Threats:</div>
+                <ul class="list-disc pl-4 text-[11px] text-slate-300 mt-1 space-y-1">
+                  ${s.identified_threats.map(t => `<li>${t}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="p-3 rounded bg-slate-900 border border-slate-800">
+                <div class="font-bold text-emerald-400 text-xs">Mitigation Protocols:</div>
+                <ul class="list-disc pl-4 text-[11px] text-slate-300 mt-1 space-y-1">
+                  ${s.mitigations.map(m => `<li>${m}</li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'runbook') {
+        const r = currentSOPBundle.runbook;
+        container.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex justify-between items-center text-sm font-bold text-white border-b border-slate-800 pb-2">
+              <span>${r.title}</span>
+              <span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs">OWNER: ${r.owner_role.toUpperCase()}</span>
+            </div>
+            <div class="text-slate-300"><strong>Deployment Strategy:</strong> ${r.deployment_strategy}</div>
+            <div class="font-bold text-xs text-white pt-2">Canary Phased Rollout:</div>
+            <ul class="list-decimal pl-5 text-xs text-slate-300 space-y-1">
+              ${r.canary_phases.map(p => `<li>${p}</li>`).join('')}
+            </ul>
+            <div class="font-bold text-xs text-rose-400 pt-2">Automated Rollback Triggers:</div>
+            <ul class="list-disc pl-5 text-xs text-rose-300 space-y-0.5">
+              ${r.rollback_triggers.map(tr => `<li>${tr}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+    }
+
+    async function checkUICommunicationACL() {
+      const s = document.getElementById('aclSenderInput').value.trim();
+      const r = document.getElementById('aclRecipientInput').value.trim();
+      const em = document.getElementById('aclEmergencyCheckbox').checked;
+      const out = document.getElementById('aclTestOutcome');
+
+      try {
+        const res = await fetch(`${API_BASE}/orchestration/acl/check?sender=${encodeURIComponent(s)}&recipient=${encodeURIComponent(r)}&emergency=${em}`);
+        const d = await res.json();
+        const badgeColor = d.allowed ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-rose-950 text-rose-300 border-rose-800';
+
+        out.innerHTML = `
+          <div class="flex justify-between items-center text-xs">
+            <span class="px-2 py-0.5 rounded border font-bold ${badgeColor}">
+              ${d.allowed ? 'ROUTE AUTHORIZED' : 'BLOCKED: UNAUTHORIZED BYPASS'}
+            </span>
+            <span class="text-slate-400 font-mono">Channel: ${d.channel_type}</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-1">${d.reason}</p>
+          ${d.audit_flag ? `<div class="text-[10px] text-amber-400 mt-1">Audit Ledger Entry Triggered: Event recorded for governance review.</div>` : ''}
+        `;
+      } catch (e) {
+        out.innerHTML = `<div class="text-rose-400 text-xs">ACL Evaluation Error: ${e.message}</div>`;
+      }
+    }
+
+    async function executeUIFullOrchestration() {
+      const btn = document.getElementById('btnRunOrchestration');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Orchestrating Enterprise Initiative...';
+
+      const topic = prompt("Enter Corporate Initiative to Orchestrate:", "Autonomous Global Multi-Cloud Expansion");
+      if (!topic) {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/orchestration/initiative`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({initiative: topic, capital_budget: 10000000.0, debate_pairing: 'governance'})
+        });
+        const data = await res.json();
+        alert(`Enterprise Orchestration Complete!\n\nOrchestration ID: ${data.orchestration_id}\nTrace ID: ${data.trace.trace_id}\nTokens Consumed: ${data.total_tokens_consumed.toLocaleString()}\nTotal Compute Spend: $${data.total_compute_cost_usd.toFixed(4)} USD\nConsensus Score: ${data.dialectic_debate.verdict.consensus_score}/100\nArtifacts Signed Off: ${data.artifact_bundle.is_fully_signed_off}`);
+        await loadUIDepartmentalSpend();
+      } catch (e) {
+        alert("Orchestration error: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
       }
     }
 
